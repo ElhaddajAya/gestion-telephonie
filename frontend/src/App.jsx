@@ -1,27 +1,42 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import Login from "./pages/Login";
 
 function App() {
-  // On stocke le message reçu du backend dans une variable d'état
-  const [message, setMessage] = useState("Connexion au serveur...");
+  const [user, setUser] = useState(null);
+  const [chargement, setChargement] = useState(true);
 
-  // useEffect s'exécute une fois, au chargement de la page
+  // Au chargement de l'app, on verifie si un utilisateur est deja stocke localement
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/test")
-      .then((response) => {
-        setMessage(response.data.message);
-      })
-      .catch((error) => {
-        setMessage("Erreur : impossible de contacter le serveur backend.");
-        console.error(error);
-      });
+    const savedUser = localStorage.getItem("user");
+    const token = localStorage.getItem("token");
+
+    if (savedUser && token) {
+      setUser(JSON.parse(savedUser));
+    }
+    setChargement(false);
   }, []);
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+  };
+
+  // Le temps qu'on verifie le localStorage, on evite d'afficher le login par erreur
+  if (chargement) {
+    return null;
+  }
+
+  if (!user) {
+    return <Login onLoginSuccess={(userData) => setUser(userData)} />;
+  }
+
   return (
-    <div style={{ padding: "40px", fontFamily: "Arial" }}>
-      <h1>Gestion Téléphonie — Test de connexion</h1>
-      <p>{message}</p>
+    <div style={{ padding: "40px" }}>
+      <h1>
+        Connecté ! Bienvenue {user.prenom} {user.nom}
+      </h1>
+      <button onClick={handleLogout}>Se déconnecter</button>
     </div>
   );
 }
