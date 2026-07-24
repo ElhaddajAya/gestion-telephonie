@@ -54,7 +54,7 @@ function ChangePassword({ onSuccess }) {
           borderRadius: "10px",
           width: "clamp(380px, 22vw, 520px)",
           boxSizing: "content-box",
-          boxShadow: "0 2px 16px rgba(0,0,0,0.08)",
+          boxShadow: "0 4px 14px rgba(43,42,38,0.06)",
           border: "1px solid #eee",
           fontFamily: "'Montserrat', sans-serif",
         }}

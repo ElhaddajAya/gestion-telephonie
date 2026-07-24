@@ -42,6 +42,7 @@ function Dashboard({ onLogout }) {
     borderRadius: "10px",
     padding: "clamp(16px, 1.4vw, 24px) clamp(18px, 1.6vw, 26px)",
     border: "1px solid #eee",
+    boxShadow: "0 4px 10px rgba(43,42,38,0.06)",
     minWidth: "clamp(160px, 14vw, 220px)",
   };
 
@@ -156,6 +157,7 @@ function Dashboard({ onLogout }) {
           borderRadius: "10px",
           overflow: "hidden",
           border: "1px solid #eee",
+          boxShadow: "0 4px 10px rgba(43,42,38,0.06)",
           fontFamily: "'Montserrat', sans-serif",
         }}
       >

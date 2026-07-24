@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import { HiOutlineLogout } from "react-icons/hi";
 
 function Layout({ children, onLogout }) {
   const location = useLocation();
@@ -11,7 +12,7 @@ function Layout({ children, onLogout }) {
     fontSize: "clamp(13px, 0.85vw, 16px)",
     marginBottom: "6px",
     cursor: "pointer",
-    color: active ? "#fff" : "#fbefe7",
+    color: "#fff",
     background: active ? "#f77100" : "transparent",
     fontWeight: active ? 600 : 400,
     textDecoration: "none",
@@ -39,7 +40,7 @@ function Layout({ children, onLogout }) {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "clamp(14px, 1.2vw, 20px)",
+            justifyContent: "space-between",
             marginBottom: "36px",
           }}
         >
@@ -92,15 +93,19 @@ function Layout({ children, onLogout }) {
         <div
           onClick={onLogout}
           style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
             marginTop: "40px",
             padding: "clamp(10px, 0.7vw, 14px) clamp(12px, 0.9vw, 18px)",
             fontSize: "clamp(12px, 0.8vw, 15px)",
-            color: "#8a887e",
+            color: "#fff",
             cursor: "pointer",
             fontFamily: "'Montserrat', sans-serif",
           }}
         >
-          ⎋ Se déconnecter
+          <HiOutlineLogout size={16} />
+          Se déconnecter
         </div>
       </div>
 
