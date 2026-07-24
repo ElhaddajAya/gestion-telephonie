@@ -50,7 +50,10 @@ function Dashboard({ user, onLogout }) {
   };
 
   return (
-    <Layout onLogout={onLogout}>
+    <Layout
+      user={user}
+      onLogout={onLogout}
+    >
       <h1
         style={{
           fontSize: "clamp(20px, 1.4vw, 32px)",

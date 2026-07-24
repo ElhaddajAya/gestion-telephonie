@@ -11,12 +11,10 @@ router.post('/', async (req, res) =>
 {
     const { code_agence, titre, type, priorite, description } = req.body;
 
-    // Validation simple des champs obligatoires
     if (!code_agence || !titre || !type || !priorite)
     {
         return res.status(400).json({ message: 'Champs obligatoires manquants.' });
     }
-
     if (!['interne', 'externe'].includes(type))
     {
         return res.status(400).json({ message: 'Type invalide (interne ou externe).' });
@@ -24,31 +22,20 @@ router.post('/', async (req, res) =>
 
     try
     {
-        // 1. Verifier que l'agence existe vraiment (evite de creer un incident pour un code invente)
         const [agences] = await db.query('SELECT code_agence FROM agence WHERE code_agence = ?', [code_agence]);
-
         if (agences.length === 0)
         {
             return res.status(404).json({ message: 'Agence introuvable.' });
         }
 
-        // 2. Creer l'incident
+        // La description est maintenant stockee directement dans l'incident
         const [result] = await db.query(
-            `INSERT INTO incident (code_agence, titre, type, priorite, etat, date_creation)
-       VALUES (?, ?, ?, ?, 'ouvert', NOW())`,
-            [code_agence, titre, type, priorite]
+            `INSERT INTO incident (code_agence, titre, description, type, priorite, etat, date_creation)
+             VALUES (?, ?, ?, ?, ?, 'ouvert', NOW())`,
+            [code_agence, titre, description || null, type, priorite]
         );
 
-        // 3. Si une description a ete fournie, on la stocke comme premier commentaire
-        if (description)
-        {
-            await db.query(
-                `INSERT INTO commentaire (incident_id, auteur_agence_code, contenu, date_creation)
-                 VALUES (?, ?, ?, NOW())`,
-                [result.insertId, code_agence, description]
-            );
-        }
-
+        // Le fil de discussion demarre vide desormais (plus de commentaire automatique)
         res.status(201).json({ message: 'Incident déclaré avec succès.', incident_id: result.insertId });
     } catch (error)
     {

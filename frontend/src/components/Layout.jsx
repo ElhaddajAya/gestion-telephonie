@@ -26,7 +26,10 @@ function Layout({ user, children, onLogout }) {
     chargerAlertes();
   }, [location.pathname]); // on rafraichit le badge a chaque changement de page
 
-  const isActive = (path) => location.pathname === path;
+  const isActive = (path) =>
+    path === "/"
+      ? location.pathname === "/"
+      : location.pathname.startsWith(path);
 
   const navItemStyle = (active) => ({
     padding: "clamp(10px, 0.7vw, 14px) clamp(12px, 0.9vw, 18px)",
@@ -56,6 +59,10 @@ function Layout({ user, children, onLogout }) {
           background: "#4b0700",
           padding: "clamp(24px, 2vw, 40px) clamp(18px, 1.4vw, 28px)",
           flexShrink: 0,
+          position: "sticky",
+          top: 0,
+          height: "100vh",
+          overflowY: "auto",
         }}
       >
         <div

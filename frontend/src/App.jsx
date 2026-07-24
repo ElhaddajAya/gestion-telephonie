@@ -9,6 +9,8 @@ import {
 import Login from "./pages/Login";
 import ChangePassword from "./pages/ChangePassword";
 import Dashboard from "./pages/Dashboard";
+import Incidents from "./pages/Incidents";
+import IncidentDetail from "./pages/IncidentDetail";
 
 // // Dashboard component temporaire pour tester la navigation après le login
 // function Dashboard({ user, onLogout }) {
@@ -126,6 +128,38 @@ function AppRoutes() {
             />
           ) : (
             <Dashboard
+              user={user}
+              onLogout={handleLogout}
+            />
+          )
+        }
+      />
+      <Route
+        path='/incidents'
+        element={
+          !user ? (
+            <Navigate
+              to='/login'
+              replace
+            />
+          ) : (
+            <Incidents
+              user={user}
+              onLogout={handleLogout}
+            />
+          )
+        }
+      />
+      <Route
+        path='/incidents/:id'
+        element={
+          !user ? (
+            <Navigate
+              to='/login'
+              replace
+            />
+          ) : (
+            <IncidentDetail
               user={user}
               onLogout={handleLogout}
             />
