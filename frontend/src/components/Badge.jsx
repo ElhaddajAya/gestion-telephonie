@@ -26,9 +26,9 @@ function Badge({ valeur }) {
     <span
       style={{
         display: "inline-block",
-        padding: "3px 10px",
+        padding: "5px 13px",
         borderRadius: "20px",
-        fontSize: "clamp(10px, 0.7vw, 12px)",
+        fontSize: "clamp(11px, 0.8vw, 13px)",
         fontWeight: 600,
         background: style.bg,
         color: style.color,

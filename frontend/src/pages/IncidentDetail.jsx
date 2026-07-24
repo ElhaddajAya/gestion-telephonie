@@ -4,6 +4,7 @@ import api from "../services/api";
 import { HiOutlineArrowLeft } from "react-icons/hi";
 import Layout from "../components/Layout";
 import Badge from "../components/Badge";
+import ModalReassigner from "../components/ModalReassigner";
 
 function IncidentDetail({ user, onLogout }) {
   const { id } = useParams();
@@ -11,6 +12,7 @@ function IncidentDetail({ user, onLogout }) {
   const [incident, setIncident] = useState(null);
   const [nouveauCommentaire, setNouveauCommentaire] = useState("");
   const [chargement, setChargement] = useState(true);
+  const [modalReassignerOuvert, setModalReassignerOuvert] = useState(false);
 
   async function charger() {
     try {
@@ -61,11 +63,10 @@ function IncidentDetail({ user, onLogout }) {
     }
   };
 
-  const reassigner = async () => {
-    const idAdmin = prompt("Entrer l'id du nouvel admin à assigner :");
-    if (!idAdmin) return;
+  const reassigner = async (admin) => {
     try {
-      await api.put(`/incidents/${id}/assigner`, { admin_id: idAdmin });
+      await api.put(`/incidents/${id}/assigner`, { admin_id: admin.id });
+      setModalReassignerOuvert(false);
       charger();
     } catch (error) {
       console.error("Erreur réassignation :", error);
@@ -123,7 +124,7 @@ function IncidentDetail({ user, onLogout }) {
         user={user}
         onLogout={onLogout}
       >
-        <p>Incident introuvable.</p>
+        <p>Ticket introuvable.</p>
       </Layout>
     );
 
@@ -137,15 +138,15 @@ function IncidentDetail({ user, onLogout }) {
         style={{
           display: "flex",
           alignItems: "center",
-          gap: "4px",
-          fontSize: "12px",
+          gap: "6px",
+          fontSize: "clamp(13px, 0.9vw, 15px)",
           color: "#8a887e",
           cursor: "pointer",
-          marginBottom: "10px",
+          marginBottom: "14px",
         }}
       >
-        <HiOutlineArrowLeft size={13} />
-        Retour aux incidents · #{incident.id}
+        <HiOutlineArrowLeft size={16} />
+        Retour aux tickets · #{incident.id}
       </div>
       <h1
         style={{
@@ -344,7 +345,7 @@ function IncidentDetail({ user, onLogout }) {
                     {incident.prenom_admin} {incident.nom_admin}
                   </b>
                   <span
-                    onClick={reassigner}
+                    onClick={() => setModalReassignerOuvert(true)}
                     style={{
                       color: "#f77100",
                       fontWeight: 600,
@@ -378,7 +379,7 @@ function IncidentDetail({ user, onLogout }) {
 
             <label
               style={{
-                fontSize: "12px",
+                fontSize: "14px",
                 color: "#8a887e",
                 display: "block",
                 marginTop: "14px",
@@ -405,6 +406,12 @@ function IncidentDetail({ user, onLogout }) {
           </div>
         </div>
       </div>
+
+      <ModalReassigner
+        ouvert={modalReassignerOuvert}
+        onFermer={() => setModalReassignerOuvert(false)}
+        onSelectionner={reassigner}
+      />
     </Layout>
   );
 }

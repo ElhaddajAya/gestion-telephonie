@@ -57,7 +57,7 @@ function Incidents({ user, onLogout }) {
           fontWeight: 600,
         }}
       >
-        Incidents
+        Tickets
       </h1>
       <p
         style={{
@@ -66,7 +66,7 @@ function Incidents({ user, onLogout }) {
           marginBottom: "clamp(20px, 1.6vw, 30px)",
         }}
       >
-        Liste complète des incidents déclarés sur le réseau
+        Liste complète des tickets déclarés sur le réseau
       </p>
 
       <div
@@ -262,7 +262,7 @@ function Incidents({ user, onLogout }) {
                     color: "#8a887e",
                   }}
                 >
-                  Aucun incident trouvé.
+                  Aucun ticket trouvé.
                 </td>
               </tr>
             )}

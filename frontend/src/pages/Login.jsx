@@ -101,7 +101,7 @@ function Login({ onLoginSuccess }) {
               fontFamily: "'Montserrat', sans-serif",
             }}
           >
-            Gestion des incidents téléphonie — BP Rabat-Kénitra
+            Gestion des tickets téléphonie — BP Rabat-Kénitra
           </p>
         </div>
 

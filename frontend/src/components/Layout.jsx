@@ -88,7 +88,7 @@ function Layout({ user, children, onLogout }) {
           to='/incidents'
           style={navItemStyle(isActive("/incidents"))}
         >
-          Incidents
+          Tickets
         </Link>
         <Link
           to='/agences'
@@ -256,7 +256,7 @@ function Layout({ user, children, onLogout }) {
                       padding: "4px 16px 8px",
                     }}
                   >
-                    Nouveaux incidents
+                    Nouveaux tickets
                   </div>
                   {nouveaux.length === 0 && (
                     <div
@@ -266,7 +266,7 @@ function Layout({ user, children, onLogout }) {
                         color: "#8a887e",
                       }}
                     >
-                      Aucun nouvel incident.
+                      Aucun nouveau ticket.
                     </div>
                   )}
                   {nouveaux.slice(0, 5).map((inc) => (
@@ -303,7 +303,7 @@ function Layout({ user, children, onLogout }) {
                         cursor: "pointer",
                       }}
                     >
-                      Voir tous les incidents
+                      Voir tous les tickets
                     </div>
                   )}
                 </div>

@@ -73,7 +73,7 @@ function Dashboard({ user, onLogout }) {
           fontFamily: "'Montserrat', sans-serif",
         }}
       >
-        Vue d'ensemble et nouveaux incidents
+        Vue d'ensemble et nouveaux tickets
       </p>
 
       <div
@@ -95,7 +95,7 @@ function Dashboard({ user, onLogout }) {
             {stats.incidents_ouverts}
           </div>
           <div style={{ fontSize: "clamp(12px, 0.85vw, 15px)", color: "#8a887e" }}>
-            Incidents ouverts
+            Tickets ouverts
           </div>
         </div>
         <div style={cardStyle}>
@@ -152,7 +152,7 @@ function Dashboard({ user, onLogout }) {
           fontWeight: 600,
         }}
       >
-        Nouveaux incidents (non traités)
+        Nouveaux tickets (non traités)
       </h3>
 
       <table
@@ -222,6 +222,21 @@ function Dashboard({ user, onLogout }) {
               </td>
             </tr>
           ))}
+          {incidents.length === 0 && (
+            <tr>
+              <td
+                colSpan={5}
+                style={{
+                  padding: "20px",
+                  textAlign: "center",
+                  color: "#8a887e",
+                  fontSize: "13px",
+                }}
+              >
+                Aucun ticket pour l'instant.
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </Layout>

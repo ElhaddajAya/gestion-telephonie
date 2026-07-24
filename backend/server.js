@@ -17,6 +17,9 @@ app.use('/api/incidents', incidentsRoutes);
 const agencesRoutes = require('./routes/agences');
 app.use('/api/agences', agencesRoutes);
 
+const utilisateursRoutes = require('./routes/utilisateurs');
+app.use('/api/utilisateurs', utilisateursRoutes);
+
 app.get('/api/test', (req, res) =>
 {
     res.json({ message: 'Le serveur backend fonctionne !' });
