@@ -44,15 +44,16 @@ function Login({ onLoginSuccess }) {
         onSubmit={handleSubmit}
         style={{
           background: "#fff",
-          padding: "40px",
+          padding: "clamp(32px, 3vw, 56px)",
           borderRadius: "10px",
-          width: "360px",
+          width: "clamp(380px, 22vw, 520px)",
+          boxSizing: "content-box",
           boxShadow: "0 2px 16px rgba(0,0,0,0.08)",
           border: "1px solid #eee",
           fontFamily: "'Montserrat', sans-serif",
         }}
       >
-        <div style={{ marginBottom: "28px" }}>
+        <div style={{ marginBottom: "clamp(28px, 2vw, 40px)" }}>
           <div
             style={{
               display: "flex",
@@ -62,7 +63,7 @@ function Login({ onLoginSuccess }) {
           >
             <div
               style={{
-                fontSize: "16px",
+                fontSize: "clamp(16px, 1.1vw, 20px)",
                 fontWeight: 700,
                 color: "#f77100",
                 letterSpacing: "0.01em",
@@ -74,15 +75,15 @@ function Login({ onLoginSuccess }) {
             <img
               src='/logo_bp.png'
               alt='Banque Populaire'
-              style={{ height: "48px" }}
+              style={{ height: "clamp(44px, 3vw, 56px)" }}
             />
           </div>
 
           <h1
             style={{
               color: "#2b2a26",
-              fontSize: "17px",
-              margin: "20px 0 0",
+              fontSize: "clamp(17px, 1.2vw, 22px)",
+              margin: "clamp(18px, 1.2vw, 24px) 0 0",
               textAlign: "center",
               fontFamily: "'Montserrat', sans-serif",
               fontWeight: 600,
@@ -93,9 +94,9 @@ function Login({ onLoginSuccess }) {
           </h1>
           <p
             style={{
-              fontSize: "13px",
+              fontSize: "clamp(13px, 0.9vw, 15px)",
               color: "#8a887e",
-              marginBottom: "20px",
+              marginBottom: "clamp(20px, 1.4vw, 28px)",
               textAlign: "center",
               fontFamily: "'Montserrat', sans-serif",
             }}
@@ -107,8 +108,8 @@ function Login({ onLoginSuccess }) {
         <label
           style={{
             display: "block",
-            marginTop: "16px",
-            fontSize: "13px",
+            marginTop: "clamp(16px, 1.1vw, 20px)",
+            fontSize: "clamp(13px, 0.85vw, 15px)",
             fontWeight: 600,
             color: "#4a483f",
           }}
@@ -121,11 +122,11 @@ function Login({ onLoginSuccess }) {
           onChange={(e) => setMatricule(e.target.value)}
           style={{
             width: "100%",
-            padding: "10px 12px",
-            marginTop: "6px",
+            padding: "clamp(10px, 0.8vw, 13px) clamp(12px, 0.9vw, 16px)",
+            marginTop: "clamp(6px, 0.6vw, 10px)",
             border: "1px solid #d9d7cc",
             borderRadius: "6px",
-            fontSize: "14px",
+            fontSize: "clamp(14px, 0.9vw, 16px)",
             boxSizing: "border-box",
             fontFamily: "'Montserrat', sans-serif",
           }}
@@ -134,8 +135,8 @@ function Login({ onLoginSuccess }) {
         <label
           style={{
             display: "block",
-            marginTop: "16px",
-            fontSize: "13px",
+            marginTop: "clamp(16px, 1.1vw, 20px)",
+            fontSize: "clamp(13px, 0.85vw, 15px)",
             fontWeight: 600,
             color: "#4a483f",
           }}
@@ -148,11 +149,11 @@ function Login({ onLoginSuccess }) {
           onChange={(e) => setMotDePasse(e.target.value)}
           style={{
             width: "100%",
-            padding: "10px 12px",
-            marginTop: "6px",
+            padding: "clamp(10px, 0.8vw, 13px) clamp(12px, 0.9vw, 16px)",
+            marginTop: "clamp(6px, 0.6vw, 10px)",
             border: "1px solid #d9d7cc",
             borderRadius: "6px",
-            fontSize: "14px",
+            fontSize: "clamp(14px, 0.9vw, 16px)",
             boxSizing: "border-box",
             fontFamily: "'Montserrat', sans-serif",
           }}
@@ -168,13 +169,13 @@ function Login({ onLoginSuccess }) {
           type='submit'
           style={{
             width: "100%",
-            marginTop: "22px",
-            padding: "12px",
+            marginTop: "clamp(22px, 1.5vw, 28px)",
+            padding: "clamp(12px, 0.9vw, 15px)",
             background: "#f77100",
             color: "#fff",
             border: "none",
             borderRadius: "6px",
-            fontSize: "14px",
+            fontSize: "clamp(14px, 0.9vw, 16px)",
             fontWeight: 600,
             cursor: "pointer",
             fontFamily: "'Montserrat', sans-serif",

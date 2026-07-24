@@ -8,41 +8,42 @@ import {
 } from "react-router-dom";
 import Login from "./pages/Login";
 import ChangePassword from "./pages/ChangePassword";
+import Dashboard from "./pages/Dashboard";
 
-// Dashboard component temporaire pour tester la navigation après le login
-function Dashboard({ user, onLogout }) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        minHeight: "100vh",
-        fontFamily: "'Montserrat', sans-serif",
-      }}
-    >
-      <h1>
-        Bienvenue, {user.nom} {user.prenom}!
-      </h1>
-      <p>Votre rôle : {user.role}</p>
-      <button
-        onClick={onLogout}
-        style={{
-          marginTop: "20px",
-          padding: "10px 20px",
-          backgroundColor: "#f77100",
-          color: "#fff",
-          border: "none",
-          borderRadius: "5px",
-          cursor: "pointer",
-        }}
-      >
-        Déconnexion
-      </button>
-    </div>
-  );
-}
+// // Dashboard component temporaire pour tester la navigation après le login
+// function Dashboard({ user, onLogout }) {
+//   return (
+//     <div
+//       style={{
+//         display: "flex",
+//         flexDirection: "column",
+//         alignItems: "center",
+//         justifyContent: "center",
+//         minHeight: "100vh",
+//         fontFamily: "'Montserrat', sans-serif",
+//       }}
+//     >
+//       <h1>
+//         Bienvenue, {user.nom} {user.prenom}!
+//       </h1>
+//       <p>Votre rôle : {user.role}</p>
+//       <button
+//         onClick={onLogout}
+//         style={{
+//           marginTop: "20px",
+//           padding: "10px 20px",
+//           backgroundColor: "#f77100",
+//           color: "#fff",
+//           border: "none",
+//           borderRadius: "5px",
+//           cursor: "pointer",
+//         }}
+//       >
+//         Déconnexion
+//       </button>
+//     </div>
+//   );
+// }
 
 function AppRoutes() {
   const [user, setUser] = useState(null);
@@ -128,6 +129,24 @@ function AppRoutes() {
               user={user}
               onLogout={handleLogout}
             />
+          )
+        }
+      />
+      <Route
+        path='/'
+        element={
+          !user ? (
+            <Navigate
+              to='/login'
+              replace
+            />
+          ) : user.doit_changer_mot_de_passe ? (
+            <Navigate
+              to='/changer-mot-de-passe'
+              replace
+            />
+          ) : (
+            <Dashboard onLogout={handleLogout} />
           )
         }
       />
