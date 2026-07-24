@@ -132,24 +132,6 @@ function AppRoutes() {
           )
         }
       />
-      <Route
-        path='/'
-        element={
-          !user ? (
-            <Navigate
-              to='/login'
-              replace
-            />
-          ) : user.doit_changer_mot_de_passe ? (
-            <Navigate
-              to='/changer-mot-de-passe'
-              replace
-            />
-          ) : (
-            <Dashboard onLogout={handleLogout} />
-          )
-        }
-      />
     </Routes>
   );
 }

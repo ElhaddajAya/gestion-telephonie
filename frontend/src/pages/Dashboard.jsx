@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import Layout from "../components/Layout";
 
-function Dashboard({ onLogout }) {
+function Dashboard({ user, onLogout }) {
   const [stats, setStats] = useState(null);
   const [incidents, setIncidents] = useState([]);
   const [chargement, setChargement] = useState(true);
@@ -29,7 +29,10 @@ function Dashboard({ onLogout }) {
 
   if (chargement)
     return (
-      <Layout onLogout={onLogout}>
+      <Layout
+        user={user}
+        onLogout={onLogout}
+      >
         <p style={{ fontFamily: "'Montserrat', sans-serif", color: "#8a887e" }}>
           Chargement...
         </p>
