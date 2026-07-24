@@ -190,42 +190,65 @@ function IncidentDetail({ user, onLogout }) {
           {/* Fil de discussion */}
           <div style={cardStyle}>
             <div style={labelStyle}>Fil de discussion</div>
-            {incident.commentaires.length === 0 && (
-              <p style={{ color: "#8a887e", fontSize: "13px" }}>
-                Aucun commentaire pour l'instant.
-              </p>
-            )}
-            {incident.commentaires.map((c) => (
-              <div
-                key={c.id}
-                style={{ marginBottom: "22px" }}
-              >
-                <div
-                  style={{
-                    fontSize: "12px",
-                    color: "#8a887e",
-                    marginBottom: "8px",
-                  }}
-                >
-                  <b style={{ color: "#4b0700" }}>
-                    {c.auteur_agence_code
-                      ? `Agence — ${c.nom_agence_auteur}`
-                      : `Admin — ${c.prenom_admin} ${c.nom_admin}`}
-                  </b>{" "}
-                  · {new Date(c.date_creation).toLocaleString("fr-FR")}
-                </div>
-                <div
-                  style={{
-                    fontSize: "13px",
-                    background: "#f4f4f4",
-                    padding: "10px 12px",
-                    borderRadius: "8px",
-                  }}
-                >
-                  {c.contenu}
-                </div>
-              </div>
-            ))}
+            <div
+              style={{
+                maxHeight: "clamp(280px, 40vh, 520px)",
+                overflowY: "auto",
+                overflowX: "hidden",
+                padding: "0 12px",
+                margin: "0 -12px",
+              }}
+            >
+              {incident.commentaires.length === 0 && (
+                <p style={{ color: "#8a887e", fontSize: "13px" }}>
+                  Aucun commentaire pour l'instant.
+                </p>
+              )}
+              {incident.commentaires.map((c) => {
+                const estAgence = !!c.auteur_agence_code;
+                return (
+                  <div
+                    key={c.id}
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: estAgence ? "flex-start" : "flex-end",
+                      marginBottom: "22px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        color: "#8a887e",
+                        marginBottom: "8px",
+                      }}
+                    >
+                      <b style={{ color: "#4b0700" }}>
+                        {estAgence
+                          ? `Agence — ${c.nom_agence_auteur}`
+                          : `Admin — ${c.prenom_admin} ${c.nom_admin}`}
+                      </b>{" "}
+                      · {new Date(c.date_creation).toLocaleString("fr-FR")}
+                    </div>
+                    <div
+                      className={`chat-bubble ${estAgence ? "chat-bubble-in" : "chat-bubble-out"}`}
+                      style={{
+                        fontSize: "13px",
+                        maxWidth: "75%",
+                        background: estAgence ? "#f4f4f4" : "#fdeade",
+                        color: "#2b2a26",
+                        padding: "10px 12px",
+                        borderRadius: estAgence
+                          ? "12px 12px 12px 0"
+                          : "12px 12px 0 12px",
+                      }}
+                    >
+                      {c.contenu}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
 
             <div style={{ display: "flex", gap: "8px", marginTop: "16px" }}>
               <textarea
@@ -285,7 +308,7 @@ function IncidentDetail({ user, onLogout }) {
             </div>
             <div style={infoLine}>
               <span>Email agence</span>
-              <b style={{ fontSize: "12px" }}>{incident.email_agence || "—"}</b>
+              <b>{incident.email_agence || "—"}</b>
             </div>
             <div style={infoLine}>
               <span>Plateforme</span>
