@@ -1,31 +1,37 @@
 import { useState } from "react";
 import api from "../services/api";
 
-function Login({ onLoginSuccess }) {
-  const [matricule, setMatricule] = useState("");
-  const [motDePasse, setMotDePasse] = useState("");
+function ChangePassword({ onSuccess }) {
+  const [nouveauMdp, setNouveauMdp] = useState("");
+  const [confirmation, setConfirmation] = useState("");
   const [erreur, setErreur] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErreur("");
 
+    if (nouveauMdp !== confirmation) {
+      setErreur("Les deux mots de passe ne correspondent pas.");
+      return;
+    }
+    if (nouveauMdp.length < 8) {
+      setErreur("Le mot de passe doit contenir au moins 8 caractères.");
+      return;
+    }
+
     try {
-      const response = await api.post("/auth/login", {
-        matricule,
-        mot_de_passe: motDePasse,
+      await api.put("/auth/change-password", {
+        nouveau_mot_de_passe: nouveauMdp,
       });
 
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
+      // On met a jour l'utilisateur stocke localement : il n'a plus besoin de changer son mdp
+      const user = JSON.parse(localStorage.getItem("user"));
+      user.doit_changer_mot_de_passe = false;
+      localStorage.setItem("user", JSON.stringify(user));
 
-      onLoginSuccess(response.data.user);
+      onSuccess(user);
     } catch (error) {
-      if (error.response) {
-        setErreur(error.response.data.message);
-      } else {
-        setErreur("Impossible de contacter le serveur.");
-      }
+      setErreur(error.response?.data?.message || "Erreur lors du changement.");
     }
   };
 
@@ -89,7 +95,7 @@ function Login({ onLoginSuccess }) {
               letterSpacing: "0.01em",
             }}
           >
-            Connexion admin
+            Changement de mot de passe
           </h1>
           <p
             style={{
@@ -100,7 +106,8 @@ function Login({ onLoginSuccess }) {
               fontFamily: "'Montserrat', sans-serif",
             }}
           >
-            Gestion des incidents téléphonie — BP Rabat-Kénitra
+            Première connexion : vous devez choisir un nouveau mot de passe
+            avant de continuer.
           </p>
         </div>
 
@@ -113,12 +120,12 @@ function Login({ onLoginSuccess }) {
             color: "#4a483f",
           }}
         >
-          Matricule
+          Nouveau mot de passe
         </label>
         <input
-          type='text'
-          value={matricule}
-          onChange={(e) => setMatricule(e.target.value)}
+          type='password'
+          value={nouveauMdp}
+          onChange={(e) => setNouveauMdp(e.target.value)}
           style={{
             width: "100%",
             padding: "10px 12px",
@@ -140,12 +147,12 @@ function Login({ onLoginSuccess }) {
             color: "#4a483f",
           }}
         >
-          Mot de passe
+          Confirmer le mot de passe
         </label>
         <input
           type='password'
-          value={motDePasse}
-          onChange={(e) => setMotDePasse(e.target.value)}
+          value={confirmation}
+          onChange={(e) => setConfirmation(e.target.value)}
           style={{
             width: "100%",
             padding: "10px 12px",
@@ -180,11 +187,11 @@ function Login({ onLoginSuccess }) {
             fontFamily: "'Montserrat', sans-serif",
           }}
         >
-          Se connecter
+          Valider
         </button>
       </form>
     </div>
   );
 }
 
-export default Login;
+export default ChangePassword;

@@ -60,3 +60,31 @@ router.post('/login', async (req, res) =>
 });
 
 module.exports = router;
+
+const jwtMiddleware = require('../middleware/auth'); // on va le créer juste après
+
+// PUT /api/auth/change-password (utilisateur déjà connecté)
+router.put('/change-password', jwtMiddleware, async (req, res) =>
+{
+    const { nouveau_mot_de_passe } = req.body;
+
+    if (!nouveau_mot_de_passe || nouveau_mot_de_passe.length < 8)
+    {
+        return res.status(400).json({ message: 'Le mot de passe doit contenir au moins 8 caractères.' });
+    }
+
+    try
+    {
+        const hash = await bcrypt.hash(nouveau_mot_de_passe, 10);
+
+        await db.query(
+            'UPDATE utilisateur SET mot_de_passe = ?, doit_changer_mot_de_passe = 0 WHERE id = ?',
+            [hash, req.user.id]
+        );
+
+        res.json({ message: 'Mot de passe mis à jour avec succès.' });
+    } catch (error)
+    {
+        res.status(500).json({ message: 'Erreur serveur', erreur: error.message });
+    }
+});

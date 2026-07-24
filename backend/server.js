@@ -11,6 +11,12 @@ app.use(express.json());
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
 
+const incidentsRoutes = require('./routes/incidents');
+app.use('/api/incidents', incidentsRoutes);
+
+const agencesRoutes = require('./routes/agences');
+app.use('/api/agences', agencesRoutes);
+
 app.get('/api/test', (req, res) =>
 {
     res.json({ message: 'Le serveur backend fonctionne !' });

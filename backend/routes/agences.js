@@ -1,0 +1,257 @@
+const ExcelJS = require('exceljs');
+const express = require('express');
+const db = require('../db');
+const verifyToken = require('../middleware/auth');
+const multer = require('multer');
+const XLSX = require('xlsx');
+
+// Stocke le fichier uploade en memoire (pas sur le disque), suffisant pour un import ponctuel
+const upload = multer({ storage: multer.memoryStorage() });
+
+const router = express.Router();
+
+// Convertit un texte en cle technique : minuscules, sans accents, espaces -> underscore
+// Permet d'accepter des en-tetes Excel ecrits naturellement (ex: "Code agence", "Téléphone fixe")
+function normaliserCle(texte)
+{
+    return texte
+        .toString()
+        .trim()
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // enleve les accents
+        .replace(/\s+/g, '_'); // remplace les espaces par des underscores
+}
+
+// Convertit une ligne Excel (cles variees) vers nos noms de champs attendus
+function normaliserLigne(ligne)
+{
+    const resultat = {};
+    for (const [cle, valeur] of Object.entries(ligne))
+    {
+        const cleNorm = normaliserCle(cle);
+        resultat[cleNorm] = valeur;
+    }
+    return resultat;
+}
+
+// GET /api/agences
+router.get('/', verifyToken, async (req, res) =>
+{
+    const { recherche, succursale, plateforme } = req.query;
+
+    try
+    {
+        let sql = 'SELECT * FROM agence WHERE 1=1';
+        const params = [];
+
+        if (recherche)
+        {
+            sql += ' AND (nom LIKE ? OR code_agence LIKE ?)';
+            params.push(`%${recherche}%`, `%${recherche}%`);
+        }
+        if (succursale)
+        {
+            sql += ' AND succursale = ?';
+            params.push(succursale);
+        }
+        if (plateforme)
+        {
+            sql += ' AND plateforme_telephonie = ?';
+            params.push(plateforme);
+        }
+
+        sql += ' ORDER BY nom ASC';
+
+        const [rows] = await db.query(sql, params);
+        res.json(rows);
+    } catch (error)
+    {
+        res.status(500).json({ message: 'Erreur serveur', erreur: error.message });
+    }
+});
+
+// GET /api/agences/export
+router.get('/export', verifyToken, async (req, res) =>
+{
+    const { recherche, succursale, plateforme } = req.query;
+
+    try
+    {
+        let sql = 'SELECT * FROM agence WHERE 1=1';
+        const params = [];
+
+        if (recherche)
+        {
+            sql += ' AND (nom LIKE ? OR code_agence LIKE ?)';
+            params.push(`%${recherche}%`, `%${recherche}%`);
+        }
+        if (succursale)
+        {
+            sql += ' AND succursale = ?';
+            params.push(succursale);
+        }
+        if (plateforme)
+        {
+            sql += ' AND plateforme_telephonie = ?';
+            params.push(plateforme);
+        }
+        sql += ' ORDER BY nom ASC';
+
+        const [agences] = await db.query(sql, params);
+
+        const workbook = new ExcelJS.Workbook();
+        const sheet = workbook.addWorksheet('Agences');
+
+        sheet.columns = [
+            { header: 'Code agence', key: 'code_agence', width: 14 },
+            { header: 'Nom', key: 'nom', width: 28 },
+            { header: 'Succursale', key: 'succursale', width: 22 },
+            { header: 'Adresse', key: 'adresse', width: 30 },
+            { header: 'Téléphone fixe', key: 'telephone', width: 16 },
+            { header: 'Email', key: 'email', width: 30 },
+            { header: 'Plateforme', key: 'plateforme_telephonie', width: 16 },
+        ];
+
+        sheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        sheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF14355E' } };
+
+        agences.forEach((a) => sheet.addRow(a));
+
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', 'attachment; filename=agences.xlsx');
+
+        await workbook.xlsx.write(res);
+        res.end();
+    } catch (error)
+    {
+        res.status(500).json({ message: 'Erreur serveur', erreur: error.message });
+    }
+});
+
+// POST /api/agences/import
+// Accepte : Code agence, Nom agence, Succursale, Email, Telephone fixe, Plateforme telephonie
+router.post('/import', verifyToken, upload.single('fichier'), async (req, res) =>
+{
+    if (!req.file)
+    {
+        return res.status(400).json({ message: 'Aucun fichier reçu.' });
+    }
+
+    try
+    {
+        const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const lignes = XLSX.utils.sheet_to_json(sheet);
+
+        let creees = 0;
+        let misesAJour = 0;
+        const erreurs = [];
+
+        for (const ligneOriginale of lignes)
+        {
+            const ligne = normaliserLigne(ligneOriginale);
+            const { code_agence, nom_agence, succursale, email, telephone_fixe, plateforme_telephonie } = ligne; // on prends juste les champs qui nous interessent, les autres sont ignores
+
+            if (!code_agence || !nom_agence)
+            {
+                erreurs.push(`Ligne ignorée (code ou nom manquant) : ${JSON.stringify(ligneOriginale)}`);
+                continue;
+            }
+
+            const plateforme = plateforme_telephonie || 'Avaya';
+
+            const [existe] = await db.query('SELECT code_agence FROM agence WHERE code_agence = ?', [code_agence]);
+
+            if (existe.length > 0)
+            {
+                await db.query(
+                    `UPDATE agence SET nom = ?, succursale = ?, email = ?, telephone = ?, plateforme_telephonie = ? WHERE code_agence = ?`,
+                    [nom_agence, succursale || null, email || null, telephone_fixe || null, plateforme, code_agence]
+                );
+                misesAJour++;
+            } else
+            {
+                await db.query(
+                    `INSERT INTO agence (code_agence, nom, succursale, email, telephone, plateforme_telephonie) VALUES (?, ?, ?, ?, ?, ?)`,
+                    [code_agence, nom_agence, succursale || null, email || null, telephone_fixe || null, plateforme]
+                );
+                creees++;
+            }
+        }
+
+        res.json({
+            message: 'Import terminé.',
+            agences_creees: creees,
+            agences_mises_a_jour: misesAJour,
+            erreurs,
+        });
+    } catch (error)
+    {
+        res.status(500).json({ message: 'Erreur serveur', erreur: error.message });
+    }
+});
+
+// GET /api/agences/:code
+router.get('/:code', verifyToken, async (req, res) =>
+{
+    const { code } = req.params;
+
+    try
+    {
+        const [rows] = await db.query('SELECT * FROM agence WHERE code_agence = ?', [code]);
+
+        if (rows.length === 0)
+        {
+            return res.status(404).json({ message: 'Agence introuvable.' });
+        }
+
+        res.json(rows[0]);
+    } catch (error)
+    {
+        res.status(500).json({ message: 'Erreur serveur', erreur: error.message });
+    }
+});
+
+// PUT /api/agences/:code
+router.put('/:code', verifyToken, async (req, res) =>
+{
+    const { code } = req.params;
+    const { nom, succursale, email, telephone, plateforme_telephonie, statut_installation } = req.body;
+
+    try
+    {
+        const champs = [];
+        const valeurs = [];
+
+        if (nom !== undefined) { champs.push('nom = ?'); valeurs.push(nom); }
+        if (succursale !== undefined) { champs.push('succursale = ?'); valeurs.push(succursale); }
+        if (email !== undefined) { champs.push('email = ?'); valeurs.push(email); }
+        if (telephone !== undefined) { champs.push('telephone = ?'); valeurs.push(telephone); }
+        if (plateforme_telephonie !== undefined) { champs.push('plateforme_telephonie = ?'); valeurs.push(plateforme_telephonie); }
+        if (statut_installation !== undefined) { champs.push('statut_installation = ?'); valeurs.push(statut_installation); }
+
+        if (champs.length === 0)
+        {
+            return res.status(400).json({ message: 'Aucun champ à modifier fourni.' });
+        }
+
+        valeurs.push(code);
+
+        const [result] = await db.query(
+            `UPDATE agence SET ${champs.join(', ')} WHERE code_agence = ?`,
+            valeurs
+        );
+
+        if (result.affectedRows === 0)
+        {
+            return res.status(404).json({ message: 'Agence introuvable.' });
+        }
+
+        res.json({ message: 'Agence mise à jour avec succès.' });
+    } catch (error)
+    {
+        res.status(500).json({ message: 'Erreur serveur', erreur: error.message });
+    }
+});
+
+module.exports = router;
