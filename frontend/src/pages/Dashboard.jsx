@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import Layout from "../components/Layout";
+import Pagination from "../components/Pagination";
 import {
   BarChart,
   Bar,
@@ -24,6 +25,8 @@ function Dashboard({ user, onLogout }) {
   const [incidents, setIncidents] = useState([]);
   const [statsAvancees, setStatsAvancees] = useState(null);
   const [chargement, setChargement] = useState(true);
+  const [page, setPage] = useState(1);
+  const [taillePage, setTaillePage] = useState(10);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -415,7 +418,9 @@ function Dashboard({ user, onLogout }) {
               </tr>
             </thead>
             <tbody>
-              {incidents.map((inc) => (
+              {incidents
+                .slice((page - 1) * taillePage, page * taillePage)
+                .map((inc) => (
                 <tr
                   key={inc.id}
                   onClick={() => navigate(`/incidents/${inc.id}`)}
@@ -485,6 +490,16 @@ function Dashboard({ user, onLogout }) {
               )}
             </tbody>
           </table>
+
+          {incidents.length > 0 && (
+            <Pagination
+              page={page}
+              totalItems={incidents.length}
+              pageSize={taillePage}
+              onPageChange={setPage}
+              onPageSizeChange={setTaillePage}
+            />
+          )}
         </>
       )}
     </Layout>

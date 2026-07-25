@@ -27,6 +27,9 @@ function IncidentDetail({ user, onLogout }) {
 
   useEffect(() => {
     charger();
+    // rafraichissement automatique du fil de discussion (effet "temps reel")
+    const intervalle = setInterval(charger, 5000);
+    return () => clearInterval(intervalle);
   }, [id]);
 
   const changerEtat = async (nouvelEtat) => {

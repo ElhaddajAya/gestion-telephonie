@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import { HiChevronUp, HiChevronDown } from "react-icons/hi";
 import Layout from "../components/Layout";
 import Badge from "../components/Badge";
+import Pagination from "../components/Pagination";
 
 function Incidents({ user, onLogout }) {
   const [incidents, setIncidents] = useState([]);
@@ -11,6 +13,10 @@ function Incidents({ user, onLogout }) {
   const [filtreEtat, setFiltreEtat] = useState("");
   const [filtreType, setFiltreType] = useState("");
   const [filtrePriorite, setFiltrePriorite] = useState("");
+  const [filtreDate, setFiltreDate] = useState("");
+  const [tri, setTri] = useState("desc");
+  const [page, setPage] = useState(1);
+  const [taillePage, setTaillePage] = useState(10);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,9 +29,12 @@ function Incidents({ user, onLogout }) {
             etat: filtreEtat || undefined,
             type: filtreType || undefined,
             priorite: filtrePriorite || undefined,
+            date: filtreDate || undefined,
+            tri,
           },
         });
         setIncidents(res.data);
+        setPage(1);
       } catch (error) {
         console.error("Erreur chargement incidents :", error);
       } finally {
@@ -33,7 +42,12 @@ function Incidents({ user, onLogout }) {
       }
     }
     charger();
-  }, [recherche, filtreEtat, filtreType, filtrePriorite]);
+  }, [recherche, filtreEtat, filtreType, filtrePriorite, filtreDate, tri]);
+
+  const incidentsPage = incidents.slice(
+    (page - 1) * taillePage,
+    page * taillePage,
+  );
 
   const inputStyle = {
     padding: "clamp(8px, 0.6vw, 11px) clamp(10px, 0.8vw, 14px)",
@@ -113,6 +127,13 @@ function Incidents({ user, onLogout }) {
           <option value='haute'>Haute</option>
           <option value='urgente'>Urgente</option>
         </select>
+        <input
+          type='date'
+          value={filtreDate}
+          onChange={(e) => setFiltreDate(e.target.value)}
+          title='Filtrer par date de déclaration'
+          style={inputStyle}
+        />
       </div>
 
       {chargement ? (
@@ -181,16 +202,28 @@ function Incidents({ user, onLogout }) {
                 Traité par
               </th>
               <th
+                onClick={() => setTri(tri === "asc" ? "desc" : "asc")}
                 style={{
                   padding: "clamp(12px, 1vw, 18px) clamp(16px, 1.2vw, 22px)",
+                  cursor: "pointer",
+                  userSelect: "none",
                 }}
               >
-                Déclaré le
+                <span
+                  style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}
+                >
+                  Déclaré le
+                  {tri === "asc" ? (
+                    <HiChevronUp size={14} />
+                  ) : (
+                    <HiChevronDown size={14} />
+                  )}
+                </span>
               </th>
             </tr>
           </thead>
           <tbody>
-            {incidents.map((inc) => (
+            {incidentsPage.map((inc) => (
               <tr
                 key={inc.id}
                 onClick={() => navigate(`/incidents/${inc.id}`)}
@@ -268,6 +301,16 @@ function Incidents({ user, onLogout }) {
             )}
           </tbody>
         </table>
+      )}
+
+      {!chargement && incidents.length > 0 && (
+        <Pagination
+          page={page}
+          totalItems={incidents.length}
+          pageSize={taillePage}
+          onPageChange={setPage}
+          onPageSizeChange={setTaillePage}
+        />
       )}
     </Layout>
   );

@@ -120,10 +120,10 @@ router.get('/stats-detaillees', verifyToken, async (req, res) =>
 
 // GET /api/incidents
 // Route protegee : reservee aux admins connectes
-// Filtres optionnels via l'URL : ?etat=ouvert&type=externe&priorite=urgente
+// Filtres optionnels via l'URL : ?etat=ouvert&type=externe&priorite=urgente&date=2026-07-24&tri=asc
 router.get('/', verifyToken, async (req, res) =>
 {
-    const { etat, type, priorite, agence } = req.query;
+    const { etat, type, priorite, agence, date, tri } = req.query;
 
     try
     {
@@ -158,8 +158,15 @@ router.get('/', verifyToken, async (req, res) =>
             sql += ' AND (a.nom LIKE ? OR i.code_agence LIKE ?)';
             params.push(`%${agence}%`, `%${agence}%`);
         }
+        if (date)
+        {
+            sql += ' AND DATE(i.date_creation) = ?';
+            params.push(date);
+        }
 
-        sql += ' ORDER BY i.date_creation DESC';
+        // Tri par date de declaration, ASC ou DESC (DESC = plus recent en premier, par defaut)
+        const direction = tri === 'asc' ? 'ASC' : 'DESC';
+        sql += ` ORDER BY i.date_creation ${direction}`;
 
         const [rows] = await db.query(sql, params);
 
