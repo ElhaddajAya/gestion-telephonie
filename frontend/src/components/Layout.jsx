@@ -282,6 +282,9 @@ function Layout({ user, children, onLogout }) {
                         borderTop: "1px solid #f3f4f6",
                         cursor: "pointer",
                         color: "#2b2a26",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
                       }}
                     >
                       <b style={{ color: "#4b0700" }}>{inc.nom_agence}</b> —{" "}

@@ -73,6 +73,51 @@ router.get('/stats', verifyToken, async (req, res) =>
     }
 });
 
+// GET /api/incidents/stats-detaillees
+// Route protegee : stats avancees pour enrichir le dashboard
+router.get('/stats-detaillees', verifyToken, async (req, res) =>
+{
+    try
+    {
+        // Temps moyen de resolution (en heures), uniquement sur les incidents resolus
+        const [[tempsResolution]] = await db.query(`
+      SELECT AVG(TIMESTAMPDIFF(MINUTE, date_creation, date_resolution)) AS minutes_moyennes
+      FROM incident
+      WHERE etat = 'resolu' AND date_resolution IS NOT NULL
+    `);
+
+        // Incidents non assignes (personne dessus), hors incidents deja resolus
+        const [[nonAssignes]] = await db.query(`
+      SELECT COUNT(*) AS total FROM incident
+      WHERE traite_par IS NULL AND etat != 'resolu'
+    `);
+
+        // Repartition par type
+        const [parType] = await db.query(`
+      SELECT type, COUNT(*) AS total FROM incident GROUP BY type
+    `);
+
+        // Repartition par succursale (triee, les plus impactees en premier)
+        const [parSuccursale] = await db.query(`
+      SELECT a.succursale, COUNT(*) AS total
+      FROM incident i
+      JOIN agence a ON i.code_agence = a.code_agence
+      GROUP BY a.succursale
+      ORDER BY total DESC
+    `);
+
+        res.json({
+            temps_resolution_minutes: tempsResolution.minutes_moyennes,
+            incidents_non_assignes: nonAssignes.total,
+            par_type: parType,
+            par_succursale: parSuccursale,
+        });
+    } catch (error)
+    {
+        res.status(500).json({ message: 'Erreur serveur', erreur: error.message });
+    }
+});
+
 // GET /api/incidents
 // Route protegee : reservee aux admins connectes
 // Filtres optionnels via l'URL : ?etat=ouvert&type=externe&priorite=urgente

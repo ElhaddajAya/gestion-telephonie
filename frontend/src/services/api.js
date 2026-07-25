@@ -16,4 +16,20 @@ api.interceptors.request.use((config) =>
     return config;
 });
 
+// Si le token est invalide/expire (401), on nettoie la session et on renvoie vers le login
+// plutot que de laisser chaque page planter avec des donnees manquantes
+api.interceptors.response.use(
+    (response) => response,
+    (error) =>
+    {
+        if (error.response?.status === 401 && window.location.pathname !== '/login')
+        {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+        }
+        return Promise.reject(error);
+    }
+);
+
 export default api;
