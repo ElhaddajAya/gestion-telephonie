@@ -263,7 +263,7 @@ function Dashboard({ user, onLogout }) {
                   <CartesianGrid
                     strokeDasharray='3 3'
                     horizontal={false}
-                    stroke='#f3f4f6'
+                    stroke='#d7d7d7'
                   />
                   <XAxis
                     type='number'
@@ -318,7 +318,7 @@ function Dashboard({ user, onLogout }) {
                   <CartesianGrid
                     strokeDasharray='3 3'
                     horizontal={false}
-                    stroke='#f3f4f6'
+                    stroke='#d7d7d7'
                   />
                   <XAxis
                     type='number'
