@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { HiOutlineLogout, HiOutlineBell } from "react-icons/hi";
 import api from "../services/api";
-import { estNonVu } from "../services/notifications";
 
 function Layout({ user, children, onLogout }) {
   const location = useLocation();
@@ -24,11 +23,7 @@ function Layout({ user, children, onLogout }) {
           api.get("/incidents/commentaires-recents"),
         ]);
         setNouveaux(ticketsRes.data);
-        setNouveauxMessages(
-          messagesRes.data.filter((m) =>
-            estNonVu(m.incident_id, m.date_creation),
-          ),
-        );
+        setNouveauxMessages(messagesRes.data);
       } catch (error) {
         console.error("Erreur chargement alertes :", error);
       }

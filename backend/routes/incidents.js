@@ -198,6 +198,7 @@ router.get('/commentaires-recents', verifyToken, async (req, res) =>
       JOIN agence a ON c.auteur_agence_code = a.code_agence
       WHERE c.auteur_agence_code IS NOT NULL
         AND i.traite_par = ?
+        AND (i.derniere_lecture IS NULL OR c.date_creation > i.derniere_lecture)
       ORDER BY c.date_creation DESC
       LIMIT 30
     `, [req.user.id]);
@@ -260,6 +261,28 @@ router.get('/:id', verifyToken, async (req, res) =>
     }
 });
 
+// PUT /api/incidents/:id/lu
+// Route protegee : marque le ticket comme lu par l'admin assigne (appelee quand il ouvre le ticket)
+router.put('/:id/lu', verifyToken, async (req, res) =>
+{
+    const { id } = req.params;
+
+    try
+    {
+        // On ne met a jour que si c'est bien l'admin assigne qui consulte le ticket
+        // (un admin qui n'est pas traite_par ne peut pas "marquer comme lu" un ticket qui n'est pas le sien)
+        const [result] = await db.query(
+            `UPDATE incident SET derniere_lecture = NOW() WHERE id = ? AND traite_par = ?`,
+            [id, req.user.id]
+        );
+
+        res.json({ message: 'Ticket marqué comme lu.', mis_a_jour: result.affectedRows > 0 });
+    } catch (error)
+    {
+        res.status(500).json({ message: 'Erreur serveur', erreur: error.message });
+    }
+});
+
 // PUT /api/incidents/:id/etat
 // Route protegee : change l'etat d'un incident (ouvert / en_cours / resolu)
 router.put('/:id/etat', verifyToken, async (req, res) =>
@@ -315,8 +338,9 @@ router.put('/:id/assigner', verifyToken, async (req, res) =>
             return res.status(404).json({ message: 'Admin introuvable.' });
         }
 
+        // On reinitialise derniere_lecture : le nouvel admin doit voir tout le fil comme non lu
         const [result] = await db.query(
-            `UPDATE incident SET traite_par = ? WHERE id = ?`,
+            `UPDATE incident SET traite_par = ?, derniere_lecture = NULL WHERE id = ?`,
             [idAAssigner, id]
         );
 

@@ -5,7 +5,6 @@ import { HiOutlineArrowLeft } from "react-icons/hi";
 import Layout from "../components/Layout";
 import Badge from "../components/Badge";
 import ModalReassigner from "../components/ModalReassigner";
-import { marquerVisite } from "../services/notifications";
 
 function IncidentDetail({ user, onLogout }) {
   const { id } = useParams();
@@ -19,7 +18,9 @@ function IncidentDetail({ user, onLogout }) {
     try {
       const res = await api.get(`/incidents/${id}`);
       setIncident(res.data);
-      marquerVisite(id);
+      // On previent le serveur qu'on vient de consulter ce ticket (marque comme lu)
+      // "fire and forget" : pas besoin d'attendre la reponse, ni de bloquer l'affichage si ca echoue
+      api.put(`/incidents/${id}/lu`).catch(() => {});
     } catch (error) {
       console.error("Erreur chargement incident :", error);
     } finally {
