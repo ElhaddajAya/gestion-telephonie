@@ -10,6 +10,7 @@ import Login from "./pages/Login";
 import ChangePassword from "./pages/ChangePassword";
 import Dashboard from "./pages/Dashboard";
 import Incidents from "./pages/Incidents";
+import MesTickets from "./pages/MesTickets";
 import IncidentDetail from "./pages/IncidentDetail";
 
 // // Dashboard component temporaire pour tester la navigation après le login
@@ -144,6 +145,22 @@ function AppRoutes() {
             />
           ) : (
             <Incidents
+              user={user}
+              onLogout={handleLogout}
+            />
+          )
+        }
+      />
+      <Route
+        path='/mes-tickets'
+        element={
+          !user ? (
+            <Navigate
+              to='/login'
+              replace
+            />
+          ) : (
+            <MesTickets
               user={user}
               onLogout={handleLogout}
             />

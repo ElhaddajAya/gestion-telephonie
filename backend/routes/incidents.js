@@ -120,10 +120,10 @@ router.get('/stats-detaillees', verifyToken, async (req, res) =>
 
 // GET /api/incidents
 // Route protegee : reservee aux admins connectes
-// Filtres optionnels via l'URL : ?etat=ouvert&type=externe&priorite=urgente&date=2026-07-24&tri=asc
+// Filtres optionnels via l'URL : ?etat=ouvert&type=externe&priorite=urgente&date=2026-07-24&tri=asc&assigne=moi
 router.get('/', verifyToken, async (req, res) =>
 {
-    const { etat, type, priorite, agence, date, tri } = req.query;
+    const { etat, type, priorite, agence, date, tri, assigne } = req.query;
 
     try
     {
@@ -163,12 +163,44 @@ router.get('/', verifyToken, async (req, res) =>
             sql += ' AND DATE(i.date_creation) = ?';
             params.push(date);
         }
+        if (assigne === 'moi')
+        {
+            sql += ' AND i.traite_par = ?';
+            params.push(req.user.id);
+        }
 
         // Tri par date de declaration, ASC ou DESC (DESC = plus recent en premier, par defaut)
         const direction = tri === 'asc' ? 'ASC' : 'DESC';
         sql += ` ORDER BY i.date_creation ${direction}`;
 
         const [rows] = await db.query(sql, params);
+
+        res.json(rows);
+    } catch (error)
+    {
+        res.status(500).json({ message: 'Erreur serveur', erreur: error.message });
+    }
+});
+
+// GET /api/incidents/commentaires-recents
+// Route protegee : derniers messages d'agence sur LES TICKETS DE L'ADMIN CONNECTE uniquement
+// (evite de notifier tout le monde pour chaque reponse sur un ticket qui ne les concerne pas)
+// IMPORTANT : doit etre declaree AVANT la route GET /:id, meme raison que /stats
+router.get('/commentaires-recents', verifyToken, async (req, res) =>
+{
+    try
+    {
+        const [rows] = await db.query(`
+      SELECT c.id, c.incident_id, c.contenu, c.date_creation,
+             a.nom AS nom_agence, i.titre
+      FROM commentaire c
+      JOIN incident i ON c.incident_id = i.id
+      JOIN agence a ON c.auteur_agence_code = a.code_agence
+      WHERE c.auteur_agence_code IS NOT NULL
+        AND i.traite_par = ?
+      ORDER BY c.date_creation DESC
+      LIMIT 30
+    `, [req.user.id]);
 
         res.json(rows);
     } catch (error)
@@ -314,7 +346,7 @@ router.post('/:id/commentaires', async (req, res) =>
 
     try
     {
-        const [incidents] = await db.query('SELECT id, code_agence FROM incident WHERE id = ?', [id]);
+        const [incidents] = await db.query('SELECT id, code_agence, traite_par FROM incident WHERE id = ?', [id]);
         if (incidents.length === 0)
         {
             return res.status(404).json({ message: 'Incident introuvable.' });
@@ -334,6 +366,12 @@ router.post('/:id/commentaires', async (req, res) =>
             } catch (err)
             {
                 return res.status(401).json({ message: 'Token invalide ou expiré.' });
+            }
+
+            // Seul l'admin assigne au ticket peut y repondre (il doit d'abord s'assigner)
+            if (incident.traite_par !== decoded.id)
+            {
+                return res.status(403).json({ message: "Vous devez d'abord vous assigner ce ticket pour pouvoir répondre." });
             }
 
             const [result] = await db.query(

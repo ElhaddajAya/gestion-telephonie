@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { HiOutlineLogout, HiOutlineBell } from "react-icons/hi";
 import api from "../services/api";
+import { estNonVu } from "../services/notifications";
 
 function Layout({ user, children, onLogout }) {
   const location = useLocation();
   const navigate = useNavigate();
 
   const [nouveaux, setNouveaux] = useState([]);
+  const [nouveauxMessages, setNouveauxMessages] = useState([]);
   const [ouvertBell, setOuvertBell] = useState(false);
 
   const initiales = user
@@ -17,13 +19,24 @@ function Layout({ user, children, onLogout }) {
   useEffect(() => {
     async function chargerAlertes() {
       try {
-        const res = await api.get("/incidents", { params: { etat: "ouvert" } });
-        setNouveaux(res.data);
+        const [ticketsRes, messagesRes] = await Promise.all([
+          api.get("/incidents", { params: { etat: "ouvert" } }),
+          api.get("/incidents/commentaires-recents"),
+        ]);
+        setNouveaux(ticketsRes.data);
+        setNouveauxMessages(
+          messagesRes.data.filter((m) =>
+            estNonVu(m.incident_id, m.date_creation),
+          ),
+        );
       } catch (error) {
         console.error("Erreur chargement alertes :", error);
       }
     }
     chargerAlertes();
+    // on rafraichit periodiquement pour un effet "temps reel"
+    const intervalle = setInterval(chargerAlertes, 15000);
+    return () => clearInterval(intervalle);
   }, [location.pathname]); // on rafraichit le badge a chaque changement de page
 
   const isActive = (path) =>
@@ -88,7 +101,13 @@ function Layout({ user, children, onLogout }) {
           to='/incidents'
           style={navItemStyle(isActive("/incidents"))}
         >
-          Tickets
+          Tous les tickets
+        </Link>
+        <Link
+          to='/mes-tickets'
+          style={navItemStyle(isActive("/mes-tickets"))}
+        >
+          Mes tickets
         </Link>
         <Link
           to='/agences'
@@ -209,7 +228,7 @@ function Layout({ user, children, onLogout }) {
                 size={20}
                 color='#4b0700'
               />
-              {nouveaux.length > 0 && (
+              {nouveaux.length + nouveauxMessages.length > 0 && (
                 <span
                   style={{
                     position: "absolute",
@@ -227,7 +246,7 @@ function Layout({ user, children, onLogout }) {
                     justifyContent: "center",
                   }}
                 >
-                  {nouveaux.length}
+                  {nouveaux.length + nouveauxMessages.length}
                 </span>
               )}
 
@@ -238,6 +257,8 @@ function Layout({ user, children, onLogout }) {
                     top: "44px",
                     right: 0,
                     width: "320px",
+                    maxHeight: "70vh",
+                    overflowY: "auto",
                     background: "#fff",
                     borderRadius: "10px",
                     border: "1px solid #eee",
@@ -309,6 +330,56 @@ function Layout({ user, children, onLogout }) {
                       Voir tous les tickets
                     </div>
                   )}
+
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      color: "#8a887e",
+                      textTransform: "uppercase",
+                      padding: "12px 16px 8px",
+                      borderTop: "1px solid #f3f4f6",
+                      marginTop: "8px",
+                    }}
+                  >
+                    Nouveaux messages
+                  </div>
+                  {nouveauxMessages.length === 0 && (
+                    <div
+                      style={{
+                        padding: "10px 16px",
+                        fontSize: "13px",
+                        color: "#8a887e",
+                      }}
+                    >
+                      Aucun nouveau message.
+                    </div>
+                  )}
+                  {nouveauxMessages.slice(0, 5).map((msg) => (
+                    <div
+                      key={msg.id}
+                      onClick={() => {
+                        setOuvertBell(false);
+                        setNouveauxMessages((prev) =>
+                          prev.filter((m) => m.id !== msg.id),
+                        );
+                        navigate(`/incidents/${msg.incident_id}`);
+                      }}
+                      style={{
+                        padding: "8px 16px",
+                        fontSize: "13px",
+                        borderTop: "1px solid #f3f4f6",
+                        cursor: "pointer",
+                        color: "#2b2a26",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      <b style={{ color: "#4b0700" }}>{msg.nom_agence}</b> —{" "}
+                      {msg.contenu}
+                    </div>
+                  ))}
                 </div>
               )}
             </div>

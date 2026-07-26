@@ -5,6 +5,7 @@ import { HiOutlineArrowLeft } from "react-icons/hi";
 import Layout from "../components/Layout";
 import Badge from "../components/Badge";
 import ModalReassigner from "../components/ModalReassigner";
+import { marquerVisite } from "../services/notifications";
 
 function IncidentDetail({ user, onLogout }) {
   const { id } = useParams();
@@ -18,6 +19,7 @@ function IncidentDetail({ user, onLogout }) {
     try {
       const res = await api.get(`/incidents/${id}`);
       setIncident(res.data);
+      marquerVisite(id);
     } catch (error) {
       console.error("Erreur chargement incident :", error);
     } finally {
@@ -254,39 +256,81 @@ function IncidentDetail({ user, onLogout }) {
               })}
             </div>
 
-            <div style={{ display: "flex", gap: "8px", marginTop: "16px" }}>
-              <textarea
-                rows={3}
-                placeholder='Écrire un commentaire...'
-                value={nouveauCommentaire}
-                onChange={(e) => setNouveauCommentaire(e.target.value)}
+            {incident.traite_par === user?.id ? (
+              <div style={{ display: "flex", gap: "8px", marginTop: "16px" }}>
+                <textarea
+                  rows={3}
+                  placeholder='Écrire un commentaire...'
+                  value={nouveauCommentaire}
+                  onChange={(e) => setNouveauCommentaire(e.target.value)}
+                  style={{
+                    flex: 1,
+                    padding: "10px",
+                    border: "1px solid #d9d7cc",
+                    borderRadius: "6px",
+                    fontFamily: "inherit",
+                    fontSize: "13px",
+                    resize: "none",
+                  }}
+                />
+                <button
+                  onClick={envoyerCommentaire}
+                  style={{
+                    background: "#f77100",
+                    color: "#fff",
+                    border: "none",
+                    height: "40px",
+                    borderRadius: "6px",
+                    padding: "0 20px",
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                  }}
+                >
+                  Envoyer
+                </button>
+              </div>
+            ) : (
+              <div
                 style={{
-                  flex: 1,
-                  padding: "10px",
-                  border: "1px solid #d9d7cc",
+                  marginTop: "16px",
+                  padding: "14px 16px",
+                  background: "#f4f4f4",
                   borderRadius: "6px",
-                  fontFamily: "inherit",
                   fontSize: "13px",
-                  resize: "none",
-                }}
-              />
-              <button
-                onClick={envoyerCommentaire}
-                style={{
-                  background: "#f77100",
-                  color: "#fff",
-                  border: "none",
-                  height: "40px",
-                  borderRadius: "6px",
-                  padding: "0 20px",
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  cursor: "pointer",
+                  color: "#8a887e",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "10px",
+                  flexWrap: "wrap",
                 }}
               >
-                Envoyer
-              </button>
-            </div>
+                {incident.nom_admin ? (
+                  <span>
+                    Ce ticket est assigné à{" "}
+                    <b style={{ color: "#2b2a26" }}>
+                      {incident.prenom_admin} {incident.nom_admin}
+                    </b>
+                    , seul cet admin peut répondre.
+                  </span>
+                ) : (
+                  <>
+                    <span>Assignez-vous ce ticket pour pouvoir répondre.</span>
+                    <span
+                      onClick={sAssigner}
+                      style={{
+                        color: "#f77100",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                      }}
+                    >
+                      S'assigner à moi
+                    </span>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
