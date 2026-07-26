@@ -55,3 +55,5 @@ Toutes les requêtes utilisent des **requêtes paramétrées** (`?` + tableau de
 
 - **Rôle superadmin pas encore différencié en code** : le CDC précise que seul le superadmin doit pouvoir créer des comptes admin, mais cette route (`Epic 5`) n'existe pas encore — à vérifier avec un contrôle de rôle (`req.user.role === 'superadmin'`) quand elle sera construite.
 - **Colonne `utilisateur.code_agence`** : legacy, plus utilisée depuis que les agences n'ont plus de compte — à supprimer proprement (`DROP FOREIGN KEY` puis `DROP COLUMN`).
+- **Pas de limite sur les tentatives de connexion** (`POST /api/auth/login`) : rien n'empêche un enchaînement de tentatives de mot de passe sur un compte admin (brute-force). Même en réseau interne, c'est le genre de contrôle attendu dans un contexte bancaire — une librairie comme `express-rate-limit` (bloquer après X échecs) réglerait ça simplement.
+- **HTTPS** : rien dans le code ne gère le chiffrement du trafic. Comme l'appli tourne en réseau interne, c'est probablement à gérer par un reverse proxy côté infra plutôt que dans le code — à vérifier avec M. Sebbar que ce n'est pas oublié.
