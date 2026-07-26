@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import api from "../services/api";
 import { HiOutlineArrowLeft } from "react-icons/hi";
 import Layout from "../components/Layout";
@@ -9,6 +9,10 @@ import ModalReassigner from "../components/ModalReassigner";
 function IncidentDetail({ user, onLogout }) {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  // d'ou vient-on ? "Tous les tickets" ou "Mes tickets" (transmis via navigate(..., { state }))
+  // si on arrive directement sur l'URL (rechargement de page, lien externe...), il n'y a pas de state -> on retombe sur "/incidents"
+  const retourVers = location.state?.from || "/incidents";
   const [incident, setIncident] = useState(null);
   const [nouveauCommentaire, setNouveauCommentaire] = useState("");
   const [chargement, setChargement] = useState(true);
@@ -140,7 +144,7 @@ function IncidentDetail({ user, onLogout }) {
       onLogout={onLogout}
     >
       <div
-        onClick={() => navigate("/incidents")}
+        onClick={() => navigate(retourVers)}
         style={{
           display: "flex",
           alignItems: "center",

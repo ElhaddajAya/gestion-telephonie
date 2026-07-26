@@ -230,7 +230,11 @@ function Incidents({ user, onLogout }) {
             {incidentsPage.map((inc) => (
               <tr
                 key={inc.id}
-                onClick={() => navigate(`/incidents/${inc.id}`)}
+                onClick={() =>
+                  navigate(`/incidents/${inc.id}`, {
+                    state: { from: "/incidents" },
+                  })
+                }
                 style={{
                   cursor: "pointer",
                   borderTop: "1px solid #eee",

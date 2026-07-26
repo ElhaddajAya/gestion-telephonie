@@ -220,7 +220,11 @@ function MesTickets({ user, onLogout }) {
             {incidentsPage.map((inc) => (
               <tr
                 key={inc.id}
-                onClick={() => navigate(`/incidents/${inc.id}`)}
+                onClick={() =>
+                  navigate(`/incidents/${inc.id}`, {
+                    state: { from: "/mes-tickets" },
+                  })
+                }
                 style={{
                   cursor: "pointer",
                   borderTop: "1px solid #eee",

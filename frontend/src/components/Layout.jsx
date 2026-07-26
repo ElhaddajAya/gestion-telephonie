@@ -34,10 +34,17 @@ function Layout({ user, children, onLogout }) {
     return () => clearInterval(intervalle);
   }, [location.pathname]); // on rafraichit le badge a chaque changement de page
 
+  // Sur une page de detail (/incidents/12), l'URL seule ne dit pas si on vient de
+  // "Tous les tickets" ou "Mes tickets" : on utilise l'info transmise par navigate(..., { state })
+  // pour savoir quel lien de la sidebar doit rester actif (orange).
+  const cheminEffectif = location.pathname.startsWith("/incidents/")
+    ? location.state?.from || "/incidents"
+    : location.pathname;
+
   const isActive = (path) =>
     path === "/"
-      ? location.pathname === "/"
-      : location.pathname.startsWith(path);
+      ? cheminEffectif === "/"
+      : cheminEffectif.startsWith(path);
 
   const navItemStyle = (active) => ({
     padding: "clamp(10px, 0.7vw, 14px) clamp(12px, 0.9vw, 18px)",
@@ -290,7 +297,9 @@ function Layout({ user, children, onLogout }) {
                       key={inc.id}
                       onClick={() => {
                         setOuvertBell(false);
-                        navigate(`/incidents/${inc.id}`);
+                        navigate(`/incidents/${inc.id}`, {
+                          state: { from: "/incidents" },
+                        });
                       }}
                       style={{
                         padding: "8px 16px",
@@ -358,7 +367,9 @@ function Layout({ user, children, onLogout }) {
                         setNouveauxMessages((prev) =>
                           prev.filter((m) => m.id !== msg.id),
                         );
-                        navigate(`/incidents/${msg.incident_id}`);
+                        navigate(`/incidents/${msg.incident_id}`, {
+                          state: { from: "/mes-tickets" },
+                        });
                       }}
                       style={{
                         padding: "8px 16px",
