@@ -6,7 +6,16 @@ const multer = require('multer');
 const XLSX = require('xlsx');
 
 // Stocke le fichier uploade en memoire (pas sur le disque), suffisant pour un import ponctuel
-const upload = multer({ storage: multer.memoryStorage() });
+// Limite a 5 Mo (largement suffisant pour 216 agences) pour eviter qu'un fichier enorme sature le serveur
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 },
+});
+
+const TYPES_EXCEL_ACCEPTES = [
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+    'application/vnd.ms-excel', // .xls
+];
 
 const router = express.Router();
 
@@ -135,6 +144,10 @@ router.post('/import', verifyToken, upload.single('fichier'), async (req, res) =
     if (!req.file)
     {
         return res.status(400).json({ message: 'Aucun fichier reçu.' });
+    }
+    if (!TYPES_EXCEL_ACCEPTES.includes(req.file.mimetype))
+    {
+        return res.status(400).json({ message: 'Format invalide : seuls les fichiers Excel (.xlsx, .xls) sont acceptés.' });
     }
 
     try
