@@ -237,7 +237,9 @@ function IncidentDetail({ user, onLogout }) {
                       <b style={{ color: "#4b0700" }}>
                         {estAgence
                           ? `Agence — ${c.nom_agence_auteur}`
-                          : `Admin — ${c.prenom_admin} ${c.nom_admin}`}
+                          : c.auteur_admin_id === user.id
+                            ? "Vous"
+                            : `Admin — ${c.prenom_admin} ${c.nom_admin}`}
                       </b>{" "}
                       · {new Date(c.date_creation).toLocaleString("fr-FR")}
                     </div>

@@ -17,6 +17,8 @@ function AgenceTicketDetail() {
     try {
       const res = await api.get(`/espace-agence/${code}/tickets/${id}`);
       setIncident(res.data);
+      // On previent le serveur qu'on vient de consulter ce ticket (fait disparaitre le badge "nouveau")
+      api.put(`/espace-agence/${code}/tickets/${id}/lu`).catch(() => {});
     } catch (error) {
       console.error("Erreur chargement ticket :", error);
       setErreur(true);

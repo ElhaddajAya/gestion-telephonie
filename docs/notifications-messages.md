@@ -36,3 +36,19 @@ ADD COLUMN derniere_lecture DATETIME NULL;
 ## Pourquoi pas de `localStorage` ?
 
 Une première version stockait la date de dernière visite dans le navigateur (`localStorage`). Limite : ça ne fonctionne que sur un seul poste/navigateur. En déplaçant l'info en base de données (`derniere_lecture`), le statut lu/non lu est le même partout où l'admin se connecte — une seule source de vérité.
+
+## Et côté agence ?
+
+Même besoin, même logique, mais l'agence n'a pas de compte (donc pas de `traite_par` pour elle). On suit ça avec deux colonnes supplémentaires sur `incident` :
+
+```sql
+ALTER TABLE incident
+ADD COLUMN derniere_maj DATETIME NULL,
+ADD COLUMN derniere_lecture_agence DATETIME NULL;
+```
+
+- `derniere_maj` = la dernière fois qu'un **événement marquant** s'est produit sur le ticket pour l'agence : un admin a posté un message, ou un admin s'est assigné le ticket (donc l'état passe à "en cours"). Mise à jour dans `POST /api/incidents/:id/commentaires` (cas admin) et `PUT /api/incidents/:id/assigner`.
+- `derniere_lecture_agence` = la dernière fois que l'agence a ouvert ce ticket. Mise à jour par `PUT /api/espace-agence/:code/tickets/:id/lu`, appelée en "fire and forget" par `AgenceTicketDetail.jsx` à chaque chargement.
+- Le badge "Nouveau" (liste "Mes tickets" et accueil) s'affiche si `derniere_maj` est plus récente que `derniere_lecture_agence` (calculé directement en SQL dans `GET /api/espace-agence/:code/tickets` et `.../incidents-recents`).
+
+**Pourquoi pas un email à chaque message ?** Pour éviter de solliciter le SMTP à chaque échange du fil de discussion (et d'inonder l'agence de mails), l'email (une fois le SMTP débloqué) est réservé aux événements marquants comme l'assignation — pas aux messages un par un, qui restent couverts uniquement par ce badge in-app, sans coût d'envoi.

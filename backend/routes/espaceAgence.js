@@ -72,7 +72,8 @@ router.get('/:code/incidents-recents', async (req, res) =>
     try
     {
         const [rows] = await db.query(
-            `SELECT id, titre, type, priorite, etat, date_creation
+            `SELECT id, titre, type, priorite, etat, date_creation,
+              (derniere_maj IS NOT NULL AND (derniere_lecture_agence IS NULL OR derniere_maj > derniere_lecture_agence)) AS nouveau
        FROM incident
        WHERE code_agence = ?
        ORDER BY date_creation DESC
@@ -97,7 +98,9 @@ router.get('/:code/tickets', async (req, res) =>
 
     try
     {
-        let sql = 'SELECT id, titre, type, priorite, etat, date_creation FROM incident WHERE code_agence = ?';
+        let sql = `SELECT id, titre, type, priorite, etat, date_creation,
+      (derniere_maj IS NOT NULL AND (derniere_lecture_agence IS NULL OR derniere_maj > derniere_lecture_agence)) AS nouveau
+      FROM incident WHERE code_agence = ?`;
         const params = [code];
 
         if (etat)
@@ -169,6 +172,27 @@ router.get('/:code/tickets/:id', async (req, res) =>
         );
 
         res.json({ ...incident, commentaires });
+    } catch (error)
+    {
+        res.status(500).json({ message: 'Erreur serveur', erreur: error.message });
+    }
+});
+
+// PUT /api/espace-agence/:code/tickets/:id/lu
+// Marque le ticket comme vu par l'agence (appelee a chaque ouverture du detail du ticket) —
+// permet de faire disparaitre le badge "nouveau" sur la liste et l'accueil
+router.put('/:code/tickets/:id/lu', async (req, res) =>
+{
+    const { code, id } = req.params;
+
+    try
+    {
+        const [result] = await db.query(
+            'UPDATE incident SET derniere_lecture_agence = NOW() WHERE id = ? AND code_agence = ?',
+            [id, code]
+        );
+
+        res.json({ message: 'Ticket marqué comme vu.', mis_a_jour: result.affectedRows > 0 });
     } catch (error)
     {
         res.status(500).json({ message: 'Erreur serveur', erreur: error.message });

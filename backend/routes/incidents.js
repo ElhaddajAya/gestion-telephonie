@@ -343,9 +343,10 @@ router.put('/:id/assigner', verifyToken, async (req, res) =>
         // On reinitialise derniere_lecture : le nouvel admin doit voir tout le fil comme non lu
         // Et si le ticket etait "ouvert" (personne dessus), l'assignation le fait passer "en_cours"
         // (mais on ne touche pas a etat s'il etait deja en_cours ou resolu)
+        // derniere_maj : l'assignation est aussi une "nouveaute" pour l'agence (quelqu'un s'en occupe)
         const [result] = await db.query(
             `UPDATE incident
-             SET traite_par = ?, derniere_lecture = NULL,
+             SET traite_par = ?, derniere_lecture = NULL, derniere_maj = NOW(),
                  etat = IF(etat = 'ouvert', 'en_cours', etat)
              WHERE id = ?`,
             [idAAssigner, id]
@@ -420,6 +421,10 @@ router.post('/:id/commentaires', async (req, res) =>
                 `INSERT INTO commentaire (incident_id, auteur_admin_id, contenu, date_creation) VALUES (?, ?, ?, NOW())`,
                 [id, decoded.id, contenu]
             );
+
+            // Un message d'admin est une "nouveaute" pour l'agence (notification in-app cote agence)
+            await db.query('UPDATE incident SET derniere_maj = NOW() WHERE id = ?', [id]);
+
             return res.status(201).json({ message: 'Commentaire ajouté.', commentaire_id: result.insertId });
 
         } else

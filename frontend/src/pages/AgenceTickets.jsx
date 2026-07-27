@@ -19,8 +19,11 @@ function AgenceTickets() {
   const [taillePage, setTaillePage] = useState(10);
 
   useEffect(() => {
-    async function charger() {
-      setChargement(true);
+    // premierChargement = true : affiche "Chargement..." (montage, changement de filtre/tri).
+    // Les rafraichissements automatiques suivants se font en silence, sans faire clignoter la liste
+    // ni ramener l'utilisateur a la page 1 pendant qu'il consulte la sienne.
+    async function charger(premierChargement) {
+      if (premierChargement) setChargement(true);
       try {
         const res = await api.get(`/espace-agence/${code}/tickets`, {
           params: {
@@ -32,14 +35,16 @@ function AgenceTickets() {
           },
         });
         setTickets(res.data);
-        setPage(1);
+        if (premierChargement) setPage(1);
       } catch (error) {
         console.error("Erreur chargement tickets :", error);
       } finally {
-        setChargement(false);
+        if (premierChargement) setChargement(false);
       }
     }
-    charger();
+    charger(true);
+    const intervalle = setInterval(() => charger(false), 15000);
+    return () => clearInterval(intervalle);
   }, [code, recherche, filtreEtat, filtreType, filtrePriorite, tri]);
 
   const ticketsPage = tickets.slice((page - 1) * taillePage, page * taillePage);
@@ -242,7 +247,21 @@ function AgenceTickets() {
                   }}
                 >
                   <td style={{ padding: "clamp(12px, 1vw, 18px) clamp(16px, 1.2vw, 22px)" }}>
-                    {t.titre}
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
+                      {t.titre}
+                      {!!t.nouveau && (
+                        <span
+                          title='Nouveau'
+                          style={{
+                            width: "8px",
+                            height: "8px",
+                            borderRadius: "50%",
+                            background: "#e41e3f",
+                            flexShrink: 0,
+                          }}
+                        />
+                      )}
+                    </span>
                   </td>
                   <td style={{ padding: "clamp(12px, 1vw, 18px) clamp(16px, 1.2vw, 22px)" }}>
                     <Badge valeur={t.type} />

@@ -13,9 +13,14 @@ function AgenceAccueil() {
   const [erreur, setErreur] = useState(false);
 
   useEffect(() => {
-    async function charger() {
-      setChargement(true);
-      setErreur(false);
+    // premierChargement = true : affiche "Chargement..." (montage de la page).
+    // Les rafraichissements automatiques suivants se font en silence, pour faire apparaitre/
+    // disparaitre le point rouge "nouveau" sans faire clignoter toute la page.
+    async function charger(premierChargement) {
+      if (premierChargement) {
+        setChargement(true);
+        setErreur(false);
+      }
       try {
         const [agenceRes, statsRes, recentsRes] = await Promise.all([
           api.get(`/espace-agence/${code}`),
@@ -27,12 +32,14 @@ function AgenceAccueil() {
         setRecents(recentsRes.data);
       } catch (error) {
         console.error("Erreur chargement espace agence :", error);
-        setErreur(true);
+        if (premierChargement) setErreur(true);
       } finally {
-        setChargement(false);
+        if (premierChargement) setChargement(false);
       }
     }
-    charger();
+    charger(true);
+    const intervalle = setInterval(() => charger(false), 15000);
+    return () => clearInterval(intervalle);
   }, [code]);
 
   // Meme cardStyle que Dashboard.jsx (admin), pour une taille de contenu identique
@@ -255,7 +262,21 @@ function AgenceAccueil() {
                   color: "#2b2a26",
                 }}
               >
-                <span>{inc.titre}</span>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
+                  {inc.titre}
+                  {!!inc.nouveau && (
+                    <span
+                      title='Nouveau'
+                      style={{
+                        width: "8px",
+                        height: "8px",
+                        borderRadius: "50%",
+                        background: "#e41e3f",
+                        flexShrink: 0,
+                      }}
+                    />
+                  )}
+                </span>
                 <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
                   <Badge valeur={inc.priorite} />
                   <Badge valeur={inc.etat} />
