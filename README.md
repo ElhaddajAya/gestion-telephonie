@@ -47,7 +47,8 @@ gestion-telephonie/
         │                    # AgenceAccueil, AgenceTickets, AgenceTicketDetail,
         │                    # AgenceDeclarer
         ├── components/      # Layout (sidebar + header), Badge, Pagination,
-        │                    # ModalReassigner, ModalModifierAgence
+        │                    # ModalReassigner, ModalModifierAgence,
+        │                    # ModalAjouterAdmin, ModalModifierAdmin
         └── services/        # api.js (admin, avec token) ; apiPublic.js (espace agence, sans token)
 ```
 
@@ -61,7 +62,8 @@ gestion-telephonie/
 - **Notifications** : cloche avec badge pour les nouveaux tickets et les nouvelles réponses sur les tickets assignés à l'admin connecté (statut lu/non-lu suivi en base, pas de compte requis pour l'agence). Un point rouge signale aussi les tickets avec du nouveau, ligne par ligne : sur "Mes tickets" côté admin, et sur la liste/l'accueil côté agence (réponse d'admin ou assignation depuis sa dernière visite) — sans email pour l'instant (voir `docs/notifications-messages.md`).
 - **Gestion des agences** : liste, export Excel, import/mise à jour en masse via fichier Excel.
 - **Mon profil** (`/profil`) : consultation et modification de son nom/prénom/email, changement de mot de passe, upload d'une photo de profil (JPEG/PNG/WEBP, 2 Mo max).
-- **Distinction admin / superadmin** : badge "Superadmin" affiché dans l'en-tête et lien "Comptes admin" visible uniquement pour les superadmins (liste en lecture seule pour l'instant — la gestion complète des comptes, Epic 5, reste à construire).
+- **Distinction admin / superadmin** : badge "Superadmin" affiché dans l'en-tête et lien "Comptes admin" visible uniquement pour les superadmins.
+- **Gestion des comptes admin** (superadmin uniquement, `/comptes-admin`) : création (rôle admin ou superadmin, mot de passe temporaire généré automatiquement), modification, réinitialisation de mot de passe, activation/désactivation (jamais de suppression définitive, pour garder l'historique des tickets traités par ce compte).
 
 ## Installation
 
@@ -103,7 +105,7 @@ Démarre sur `http://localhost:5173`.
 | `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`                  | Connexion MySQL                                                                                                             |
 | `JWT_SECRET`                                                    | Clé de signature des tokens JWT                                                                                             |
 | `FRONTEND_URL`                                                  | Origine autorisée par CORS (URL du frontend)                                                                                |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` | Notifications par email — optionnel, laissé vide tant que l'accès SMTP n'est pas fourni (voir`docs/changements-recents.md`) |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` | Notifications par email — optionnel, laissé vide tant que l'accès SMTP n'est pas fourni |
 
 ## Développeuse
 

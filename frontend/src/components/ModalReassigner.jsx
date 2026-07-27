@@ -11,7 +11,7 @@ function ModalReassigner({ ouvert, onFermer, onSelectionner }) {
     setRecherche("");
     setChargement(true);
     api
-      .get("/utilisateurs")
+      .get("/utilisateurs", { params: { actif: 1 } })
       .then((res) => setAdmins(res.data))
       .catch((error) => console.error("Erreur chargement admins :", error))
       .finally(() => setChargement(false));

@@ -27,6 +27,10 @@ Résumé de tous les aspects de sécurité mis en place dans le code, et de ce q
 - Un admin **ne peut commenter que s'il est l'admin assigné** au ticket (`traite_par === decoded.id`, sinon `403`) — il doit d'abord se l'assigner.
 - `PUT /:id/lu` (marquer comme lu) ne met à jour que si l'appelant est bien `traite_par` de ce ticket.
 - `PUT /:id/assigner` réinitialise `derniere_lecture` à chaque réassignation, pour que le nouvel admin ne rate pas les anciens messages.
+- **Gestion des comptes admin, réservée au superadmin** (`backend/routes/utilisateurs.js`, middleware `verifierSuperadmin` : rejette avec `403` si `req.user.role !== 'superadmin'`) : création (`POST /`), modification (`PUT /:id`), activation/désactivation (`PUT /:id/statut`), réinitialisation de mot de passe (`PUT /:id/reinitialiser-mot-de-passe`). La liste (`GET /`) reste accessible à tous les admins (nécessaire pour la réassignation de tickets).
+  - Un superadmin ne peut ni désactiver, ni changer le rôle de **son propre compte** (évite un verrouillage accidentel).
+  - Impossible de désactiver le **dernier superadmin actif** restant.
+  - Un compte désactivé (`actif = 0`) ne peut plus se connecter (`403` à `POST /api/auth/login`), mais un token JWT déjà émis avant la désactivation reste valide jusqu'à son expiration (8h) — limite connue des JWT sans état, pas de révocation immédiate.
 
 ## 4. Contre l'injection SQL
 
@@ -53,7 +57,6 @@ Toutes les requêtes utilisent des **requêtes paramétrées** (`?` + tableau de
 
 ## 8. Points ouverts (pas des failles urgentes, à garder en tête)
 
-- **Rôle superadmin pas encore différencié en code** : le CDC précise que seul le superadmin doit pouvoir créer des comptes admin, mais cette route (`Epic 5`) n'existe pas encore — à vérifier avec un contrôle de rôle (`req.user.role === 'superadmin'`) quand elle sera construite.
 - **Colonne `utilisateur.code_agence`** : legacy, plus utilisée depuis que les agences n'ont plus de compte — à supprimer proprement (`DROP FOREIGN KEY` puis `DROP COLUMN`).
 - **Pas de limite sur les tentatives de connexion** (`POST /api/auth/login`) : rien n'empêche un enchaînement de tentatives de mot de passe sur un compte admin (brute-force). Même en réseau interne, c'est le genre de contrôle attendu dans un contexte bancaire — une librairie comme `express-rate-limit` (bloquer après X échecs) réglerait ça simplement.
 - **HTTPS** : rien dans le code ne gère le chiffrement du trafic. Comme l'appli tourne en réseau interne, c'est probablement à gérer par un reverse proxy côté infra plutôt que dans le code — à vérifier avec M. Sebbar que ce n'est pas oublié.

@@ -38,6 +38,12 @@ router.post('/login', async (req, res) =>
             return res.status(401).json({ message: 'Matricule ou mot de passe incorrect.' });
         }
 
+        // Un compte desactive par un superadmin ne peut plus se connecter
+        if (!user.actif)
+        {
+            return res.status(403).json({ message: 'Ce compte a été désactivé. Contactez un superadmin.' });
+        }
+
         // 3. Creer un token qui prouve que l'utilisateur est connecte
         const token = jwt.sign(
             { id: user.id, matricule: user.matricule, role: user.role },
