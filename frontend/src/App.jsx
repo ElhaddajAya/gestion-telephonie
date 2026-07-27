@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import Incidents from "./pages/Incidents";
 import MesTickets from "./pages/MesTickets";
 import IncidentDetail from "./pages/IncidentDetail";
+import Agences from "./pages/Agences";
 
 // // Dashboard component temporaire pour tester la navigation après le login
 // function Dashboard({ user, onLogout }) {
@@ -161,6 +162,22 @@ function AppRoutes() {
             />
           ) : (
             <MesTickets
+              user={user}
+              onLogout={handleLogout}
+            />
+          )
+        }
+      />
+      <Route
+        path='/agences'
+        element={
+          !user ? (
+            <Navigate
+              to='/login'
+              replace
+            />
+          ) : (
+            <Agences
               user={user}
               onLogout={handleLogout}
             />

@@ -104,7 +104,8 @@ router.get('/export', verifyToken, async (req, res) =>
             sql += ' AND plateforme_telephonie = ?';
             params.push(plateforme);
         }
-        sql += ' ORDER BY nom ASC';
+        // Triees par succursale d'abord, pour pouvoir regrouper les lignes d'une meme succursale
+        sql += ' ORDER BY succursale ASC, nom ASC';
 
         const [agences] = await db.query(sql, params);
 
@@ -126,8 +127,76 @@ router.get('/export', verifyToken, async (req, res) =>
 
         agences.forEach((a) => sheet.addRow(a));
 
+        // Fusionne la colonne "Succursale" (3eme colonne) pour les lignes consecutives d'une meme succursale
+        // La ligne 1 est l'en-tete, les donnees commencent donc a la ligne 2
+        let debutGroupe = 2;
+        agences.forEach((a, index) =>
+        {
+            const ligneActuelle = index + 2;
+            const estDerniere = index === agences.length - 1;
+            const succursaleSuivante = estDerniere ? null : agences[index + 1].succursale;
+
+            if (estDerniere || a.succursale !== succursaleSuivante)
+            {
+                if (ligneActuelle > debutGroupe)
+                {
+                    sheet.mergeCells(debutGroupe, 3, ligneActuelle, 3);
+                    sheet.getCell(debutGroupe, 3).alignment = { vertical: 'middle' };
+                }
+                debutGroupe = ligneActuelle + 1;
+            }
+        });
+
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.setHeader('Content-Disposition', 'attachment; filename=agences.xlsx');
+
+        await workbook.xlsx.write(res);
+        res.end();
+    } catch (error)
+    {
+        res.status(500).json({ message: 'Erreur serveur', erreur: error.message });
+    }
+});
+
+// GET /api/agences/modele-import
+// Renvoie un fichier Excel vierge avec les colonnes attendues pour l'import, plus une ligne d'exemple
+router.get('/modele-import', verifyToken, async (req, res) =>
+{
+    try
+    {
+        const workbook = new ExcelJS.Workbook();
+        const sheet = workbook.addWorksheet('Modèle import');
+
+        sheet.columns = [
+            { header: 'Code agence', key: 'code_agence', width: 14 },
+            { header: 'Nom agence', key: 'nom_agence', width: 28 },
+            { header: 'Succursale', key: 'succursale', width: 22 },
+            { header: 'Email', key: 'email', width: 30 },
+            { header: 'Téléphone fixe', key: 'telephone_fixe', width: 16 },
+            { header: 'Plateforme téléphonie', key: 'plateforme_telephonie', width: 20 },
+        ];
+
+        sheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        sheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF14355E' } };
+
+        sheet.addRow({
+            code_agence: '8225',
+            nom_agence: 'DAR GUEDDARI',
+            succursale: 'KENITRA',
+            email: 'Digitalys8225@cpm.co.ma',
+            telephone_fixe: '0537123456',
+            plateforme_telephonie: 'Avaya',
+        });
+
+        sheet.addRow({});
+        const noteRow = sheet.addRow({
+            code_agence: 'Note : "Code agence" et "Nom agence" sont obligatoires. "Plateforme téléphonie" vaut "Avaya" par défaut si laissé vide. Les noms de colonnes peuvent être écrits librement (accents, espaces, majuscules).',
+        });
+        noteRow.font = { italic: true, color: { argb: 'FF8A887E' } };
+        sheet.mergeCells(noteRow.number, 1, noteRow.number, 6);
+
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', 'attachment; filename=modele_import_agences.xlsx');
 
         await workbook.xlsx.write(res);
         res.end();
@@ -229,7 +298,7 @@ router.get('/:code', verifyToken, async (req, res) =>
 router.put('/:code', verifyToken, async (req, res) =>
 {
     const { code } = req.params;
-    const { nom, succursale, email, telephone, plateforme_telephonie, statut_installation } = req.body;
+    const { nom, succursale, email, telephone, plateforme_telephonie } = req.body;
 
     try
     {
@@ -241,7 +310,6 @@ router.put('/:code', verifyToken, async (req, res) =>
         if (email !== undefined) { champs.push('email = ?'); valeurs.push(email); }
         if (telephone !== undefined) { champs.push('telephone = ?'); valeurs.push(telephone); }
         if (plateforme_telephonie !== undefined) { champs.push('plateforme_telephonie = ?'); valeurs.push(plateforme_telephonie); }
-        if (statut_installation !== undefined) { champs.push('statut_installation = ?'); valeurs.push(statut_installation); }
 
         if (champs.length === 0)
         {

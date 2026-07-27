@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 
 const router = express.Router();
 const verifyToken = require('../middleware/auth');
+const { envoyerMail } = require('../services/mailer');
 
 // POST /api/incidents
 // Route publique (pas de token) : utilisee par le formulaire de l'agence
@@ -331,12 +332,13 @@ router.put('/:id/assigner', verifyToken, async (req, res) =>
 
     try
     {
-        // Verifier que l'admin cible existe reellement
-        const [admins] = await db.query('SELECT id FROM utilisateur WHERE id = ?', [idAAssigner]);
+        // Verifier que l'admin cible existe reellement (et recuperer son email pour la notification)
+        const [admins] = await db.query('SELECT id, nom, prenom, email FROM utilisateur WHERE id = ?', [idAAssigner]);
         if (admins.length === 0)
         {
             return res.status(404).json({ message: 'Admin introuvable.' });
         }
+        const admin = admins[0];
 
         // On reinitialise derniere_lecture : le nouvel admin doit voir tout le fil comme non lu
         // Et si le ticket etait "ouvert" (personne dessus), l'assignation le fait passer "en_cours"
@@ -352,6 +354,17 @@ router.put('/:id/assigner', verifyToken, async (req, res) =>
         if (result.affectedRows === 0)
         {
             return res.status(404).json({ message: 'Incident introuvable.' });
+        }
+
+        // Notification par email a l'admin assigne (ne fait rien tant que le SMTP n'est pas configure)
+        if (admin.email)
+        {
+            const [[incidentInfo]] = await db.query('SELECT titre FROM incident WHERE id = ?', [id]);
+            await envoyerMail(
+                admin.email,
+                `TeleTrack - Ticket #${id} vous a été assigné`,
+                `Bonjour ${admin.prenom || ''} ${admin.nom},\n\nLe ticket #${id} (${incidentInfo?.titre || 'sans titre'}) vous a été assigné.\nConnectez-vous à TeleTrack pour le consulter.`
+            );
         }
 
         res.json({ message: 'Incident assigné avec succès.', assigne_a: idAAssigner });
