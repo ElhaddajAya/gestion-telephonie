@@ -43,7 +43,8 @@ gestion-telephonie/
     └── src/
         ├── pages/           # Login, ChangePassword, Dashboard, Incidents,
         │                    # MesTickets, IncidentDetail, Agences,
-        │                    # AgenceAccueil, AgenceTickets, AgenceTicketDetail
+        │                    # AgenceAccueil, AgenceTickets, AgenceTicketDetail,
+        │                    # AgenceDeclarer
         ├── components/      # Layout (sidebar + header), Badge, Pagination,
         │                    # ModalReassigner, ModalModifierAgence
         └── services/        # api.js (admin, avec token) ; apiPublic.js (espace agence, sans token)
@@ -51,8 +52,8 @@ gestion-telephonie/
 
 ## Fonctionnalités principales
 
-- **Espace agence** (`/agence/:code`, public, sans compte) : page d'accueil (identité, aperçu chiffré, tickets récents), liste complète "Mes tickets" avec filtres (état, type, priorité), et détail d'un ticket avec fil de discussion (l'agence peut répondre) — le tout scopé à sa propre agence. L'agence peut aussi marquer un ticket comme résolu ou le rouvrir (le passage à "en cours" reste réservé à l'admin).
-- **Déclaration d'incident** par l'agence (titre, type interne/externe, priorité, description).
+- **Espace agence** (`/agence/:code`, public, sans compte) : page d'accueil (identité, aperçu chiffré, tickets récents), liste complète "Mes tickets" avec filtres (état, type, priorité) et tri par date de déclaration, détail d'un ticket avec fil de discussion (l'agence peut répondre), et formulaire de déclaration (`/agence/:code/declarer`) — le tout scopé à sa propre agence. L'agence peut aussi marquer un ticket comme résolu ou le rouvrir (le passage à "en cours" reste réservé à l'admin).
+- **Déclaration d'incident** par l'agence (titre, type interne/externe, priorité, description) — redirige vers la page de suivi du ticket une fois créé.
 - **Tableau de bord** : statistiques (tickets ouverts, en cours, urgents, résolus), répartition par type/succursale, temps moyen de résolution.
 - **Liste des tickets** (tous / "Mes tickets") avec recherche, filtres (état, type, priorité, date) et tri.
 - **Détail d'un ticket** : fil de discussion en bulles de chat (admin ↔ agence), rafraîchi automatiquement, informations agence modifiables, changement d'état, assignation/réassignation.

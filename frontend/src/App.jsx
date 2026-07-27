@@ -16,6 +16,7 @@ import Agences from "./pages/Agences";
 import AgenceAccueil from "./pages/AgenceAccueil";
 import AgenceTickets from "./pages/AgenceTickets";
 import AgenceTicketDetail from "./pages/AgenceTicketDetail";
+import AgenceDeclarer from "./pages/AgenceDeclarer";
 
 // // Dashboard component temporaire pour tester la navigation après le login
 // function Dashboard({ user, onLogout }) {
@@ -99,6 +100,10 @@ function AppRoutes() {
       <Route
         path='/agence/:code/tickets/:id'
         element={<AgenceTicketDetail />}
+      />
+      <Route
+        path='/agence/:code/declarer'
+        element={<AgenceDeclarer />}
       />
       <Route
         path='/login'
