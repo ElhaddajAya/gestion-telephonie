@@ -13,19 +13,19 @@ app.use(express.json());
 // Sert les fichiers uploades (photos de profil) de maniere statique : /uploads/avatars/xxx.jpg
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-const authRoutes = require('./routes/auth');
+const authRoutes = require('./routes/admin/auth');
 app.use('/api/auth', authRoutes);
 
 const incidentsRoutes = require('./routes/incidents');
 app.use('/api/incidents', incidentsRoutes);
 
-const agencesRoutes = require('./routes/agences');
+const agencesRoutes = require('./routes/admin/agences');
 app.use('/api/agences', agencesRoutes);
 
-const utilisateursRoutes = require('./routes/utilisateurs');
+const utilisateursRoutes = require('./routes/admin/utilisateurs');
 app.use('/api/utilisateurs', utilisateursRoutes);
 
-const espaceAgenceRoutes = require('./routes/espaceAgence');
+const espaceAgenceRoutes = require('./routes/agence/espaceAgence');
 app.use('/api/espace-agence', espaceAgenceRoutes);
 
 app.get('/api/test', (req, res) =>

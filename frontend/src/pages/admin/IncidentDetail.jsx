@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import api from "../services/api";
+import api from "../../services/api";
 import { HiOutlineArrowLeft } from "react-icons/hi";
-import Layout from "../components/Layout";
-import Badge from "../components/Badge";
-import ModalReassigner from "../components/ModalReassigner";
+import Layout from "../../components/admin/Layout";
+import Badge from "../../components/Badge";
+import ModalReassigner from "../../components/admin/ModalReassigner";
 
 function IncidentDetail({ user, onLogout }) {
   const { id } = useParams();

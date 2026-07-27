@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import api from "../services/api";
+import api from "../../services/api";
 
 function ModalModifierAdmin({ admin, utilisateurConnecteId, onFermer, onSauvegarde }) {
   const [form, setForm] = useState({ nom: "", prenom: "", email: "", role: "admin" });

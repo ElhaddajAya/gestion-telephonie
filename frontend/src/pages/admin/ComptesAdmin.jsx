@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import api from "../services/api";
-import Layout from "../components/Layout";
-import ModalAjouterAdmin from "../components/ModalAjouterAdmin";
-import ModalModifierAdmin from "../components/ModalModifierAdmin";
+import api from "../../services/api";
+import Layout from "../../components/admin/Layout";
+import ModalAjouterAdmin from "../../components/admin/ModalAjouterAdmin";
+import ModalModifierAdmin from "../../components/admin/ModalModifierAdmin";
 
 function ComptesAdmin({ user, onLogout }) {
   const [utilisateurs, setUtilisateurs] = useState([]);

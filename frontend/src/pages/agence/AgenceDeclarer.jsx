@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { HiOutlineArrowLeft } from "react-icons/hi";
-import api from "../services/apiPublic";
+import api from "../../services/apiPublic";
 
 function AgenceDeclarer() {
   const { code } = useParams();

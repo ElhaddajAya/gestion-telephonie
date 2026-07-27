@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { HiOutlineArrowLeft, HiChevronUp, HiChevronDown } from "react-icons/hi";
-import api from "../services/apiPublic";
-import Badge from "../components/Badge";
-import Pagination from "../components/Pagination";
+import api from "../../services/apiPublic";
+import Badge from "../../components/Badge";
+import Pagination from "../../components/Pagination";
 
 function AgenceTickets() {
   const { code } = useParams();

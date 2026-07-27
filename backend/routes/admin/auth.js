@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
-const db = require('../db');
+const db = require('../../db');
 
 const router = express.Router();
 
@@ -70,7 +70,7 @@ router.post('/login', async (req, res) =>
 
 module.exports = router;
 
-const jwtMiddleware = require('../middleware/auth'); // on va le créer juste après
+const jwtMiddleware = require('../../middleware/auth'); // on va le créer juste après
 
 // PUT /api/auth/change-password (utilisateur déjà connecté)
 router.put('/change-password', jwtMiddleware, async (req, res) =>

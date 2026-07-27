@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import api from "../services/api";
-import Layout from "../components/Layout";
+import api from "../../services/api";
+import Layout from "../../components/admin/Layout";
 
 // Origine du backend (sans le "/api" final), pour construire l'URL de la photo de profil
 const origineApi = (import.meta.env.VITE_API_URL || "").replace(/\/api\/?$/, "");

@@ -1,10 +1,10 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
-const db = require('../db');
+const db = require('../../db');
 
 const router = express.Router();
-const verifyToken = require('../middleware/auth');
+const verifyToken = require('../../middleware/auth');
 
 // Reserve certaines routes (creation, edition, reinitialisation, statut) au superadmin uniquement.
 // La liste (GET /) reste accessible a tous les admins connectes : elle sert aussi au choix

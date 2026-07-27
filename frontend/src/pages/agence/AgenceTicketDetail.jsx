@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { HiOutlineArrowLeft } from "react-icons/hi";
-import api from "../services/apiPublic";
-import Badge from "../components/Badge";
+import api from "../../services/apiPublic";
+import Badge from "../../components/Badge";
 
 function AgenceTicketDetail() {
   const { code, id } = useParams();

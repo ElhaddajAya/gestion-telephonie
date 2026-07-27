@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { HiOutlineLogout, HiOutlineBell } from "react-icons/hi";
-import api from "../services/api";
+import api from "../../services/api";
 
 function Layout({ user, children, onLogout }) {
   const location = useLocation();

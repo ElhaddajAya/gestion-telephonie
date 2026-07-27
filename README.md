@@ -26,29 +26,35 @@ Une agence déclare un incident téléphonique (ligne coupée, standard inaccess
 
 ## Structure du projet
 
+Le code est organisé en deux espaces distincts (`admin/` = protégé par token, `agence/` = public) de part et d'autre — seuls `incidents.js` (backend, logique partagée admin/agence) et `Badge`/`Pagination` (frontend, réutilisés des deux côtés) restent à la racine.
+
 ```text
 gestion-telephonie/
 ├── backend/
 │   ├── routes/
-│   │   ├── auth.js          # login, changement de mot de passe, profil (infos + photo)
-│   │   ├── incidents.js     # CRUD incidents, commentaires, stats, notifications
-│   │   ├── agences.js       # liste, détail, modification, import/export/modèle Excel
-│   │   ├── utilisateurs.js  # liste des admins (réassignation, page "Comptes admin")
-│   │   └── espaceAgence.js  # espace agence PUBLIC (infos, stats, tickets, détail — pas de token)
-│   ├── middleware/auth.js   # verification du token JWT
-│   ├── services/mailer.js   # envoi d'email (no-op tant que le SMTP n'est pas configuré)
-│   ├── uploads/avatars/     # photos de profil uploadées (ignoré par git)
-│   ├── db.js                # pool de connexion MySQL
+│   │   ├── admin/
+│   │   │   ├── auth.js          # login, changement de mot de passe, profil (infos + photo)
+│   │   │   ├── agences.js       # gestion (admin) des 216 agences : liste, modif, import/export Excel
+│   │   │   └── utilisateurs.js  # comptes admin : liste, création, modif, statut, reset mdp
+│   │   ├── agence/
+│   │   │   └── espaceAgence.js  # espace agence PUBLIC (infos, stats, tickets, détail — pas de token)
+│   │   └── incidents.js         # CRUD incidents, commentaires, stats, notifications (partagé admin/agence)
+│   ├── middleware/auth.js       # verification du token JWT
+│   ├── services/mailer.js       # envoi d'email (no-op tant que le SMTP n'est pas configuré)
+│   ├── uploads/avatars/         # photos de profil uploadées (ignoré par git)
+│   ├── db.js                    # pool de connexion MySQL
 │   └── server.js
 └── frontend/
     └── src/
-        ├── pages/           # Login, ChangePassword, Dashboard, Incidents,
-        │                    # MesTickets, IncidentDetail, Agences, Profil, ComptesAdmin,
-        │                    # AgenceAccueil, AgenceTickets, AgenceTicketDetail,
-        │                    # AgenceDeclarer
-        ├── components/      # Layout (sidebar + header), Badge, Pagination,
-        │                    # ModalReassigner, ModalModifierAgence,
-        │                    # ModalAjouterAdmin, ModalModifierAdmin
+        ├── pages/
+        │   ├── admin/       # Login, ChangePassword, Dashboard, Incidents, MesTickets,
+        │   │                # IncidentDetail, Agences, Profil, ComptesAdmin
+        │   └── agence/      # AgenceAccueil, AgenceTickets, AgenceTicketDetail, AgenceDeclarer
+        ├── components/
+        │   ├── admin/       # Layout (sidebar + header), ModalReassigner, ModalModifierAgence,
+        │   │                # ModalAjouterAdmin, ModalModifierAdmin
+        │   ├── Badge.jsx        # partagé admin/agence
+        │   └── Pagination.jsx   # partagé admin/agence
         └── services/        # api.js (admin, avec token) ; apiPublic.js (espace agence, sans token)
 ```
 

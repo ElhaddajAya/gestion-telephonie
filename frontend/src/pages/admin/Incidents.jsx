@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../services/api";
+import api from "../../services/api";
 import { HiChevronUp, HiChevronDown } from "react-icons/hi";
-import Layout from "../components/Layout";
-import Badge from "../components/Badge";
-import Pagination from "../components/Pagination";
+import Layout from "../../components/admin/Layout";
+import Badge from "../../components/Badge";
+import Pagination from "../../components/Pagination";
 
-function MesTickets({ user, onLogout }) {
+function Incidents({ user, onLogout }) {
   const [incidents, setIncidents] = useState([]);
   const [chargement, setChargement] = useState(true);
   const [recherche, setRecherche] = useState("");
@@ -20,14 +20,11 @@ function MesTickets({ user, onLogout }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // premierChargement = true : affiche "Chargement..." (montage, changement de filtre/tri).
-    // Les rafraichissements automatiques suivants se font en silence (meme principe que l'espace agence).
-    async function charger(premierChargement) {
-      if (premierChargement) setChargement(true);
+    async function charger() {
+      setChargement(true);
       try {
         const res = await api.get("/incidents", {
           params: {
-            assigne: "moi",
             agence: recherche || undefined,
             etat: filtreEtat || undefined,
             type: filtreType || undefined,
@@ -37,16 +34,14 @@ function MesTickets({ user, onLogout }) {
           },
         });
         setIncidents(res.data);
-        if (premierChargement) setPage(1);
+        setPage(1);
       } catch (error) {
-        console.error("Erreur chargement de mes tickets :", error);
+        console.error("Erreur chargement incidents :", error);
       } finally {
-        if (premierChargement) setChargement(false);
+        setChargement(false);
       }
     }
-    charger(true);
-    const intervalle = setInterval(() => charger(false), 15000);
-    return () => clearInterval(intervalle);
+    charger();
   }, [recherche, filtreEtat, filtreType, filtrePriorite, filtreDate, tri]);
 
   const incidentsPage = incidents.slice(
@@ -76,7 +71,7 @@ function MesTickets({ user, onLogout }) {
           fontWeight: 600,
         }}
       >
-        Mes tickets
+        Tous les tickets
       </h1>
       <p
         style={{
@@ -85,7 +80,7 @@ function MesTickets({ user, onLogout }) {
           marginBottom: "clamp(20px, 1.6vw, 30px)",
         }}
       >
-        Tickets qui vous sont assignés
+        Liste complète des tickets déclarés sur le réseau
       </p>
 
       <div
@@ -200,6 +195,13 @@ function MesTickets({ user, onLogout }) {
                 État
               </th>
               <th
+                style={{
+                  padding: "clamp(12px, 1vw, 18px) clamp(16px, 1.2vw, 22px)",
+                }}
+              >
+                Traité par
+              </th>
+              <th
                 onClick={() => setTri(tri === "asc" ? "desc" : "asc")}
                 style={{
                   padding: "clamp(12px, 1vw, 18px) clamp(16px, 1.2vw, 22px)",
@@ -208,7 +210,11 @@ function MesTickets({ user, onLogout }) {
                 }}
               >
                 <span
-                  style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "4px",
+                  }}
                 >
                   Déclaré le
                   {tri === "asc" ? (
@@ -226,7 +232,7 @@ function MesTickets({ user, onLogout }) {
                 key={inc.id}
                 onClick={() =>
                   navigate(`/incidents/${inc.id}`, {
-                    state: { from: "/mes-tickets" },
+                    state: { from: "/incidents" },
                   })
                 }
                 style={{
@@ -248,21 +254,7 @@ function MesTickets({ user, onLogout }) {
                     padding: "clamp(12px, 1vw, 18px) clamp(16px, 1.2vw, 22px)",
                   }}
                 >
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
-                    {inc.titre}
-                    {!!inc.nouveau && (
-                      <span
-                        title='Nouveau message'
-                        style={{
-                          width: "8px",
-                          height: "8px",
-                          borderRadius: "50%",
-                          background: "#e41e3f",
-                          flexShrink: 0,
-                        }}
-                      />
-                    )}
-                  </span>
+                  {inc.titre}
                 </td>
                 <td
                   style={{
@@ -290,6 +282,13 @@ function MesTickets({ user, onLogout }) {
                     padding: "clamp(12px, 1vw, 18px) clamp(16px, 1.2vw, 22px)",
                   }}
                 >
+                  {inc.nom_admin ? `${inc.prenom_admin} ${inc.nom_admin}` : "—"}
+                </td>
+                <td
+                  style={{
+                    padding: "clamp(12px, 1vw, 18px) clamp(16px, 1.2vw, 22px)",
+                  }}
+                >
                   {new Date(inc.date_creation).toLocaleDateString("fr-FR")}
                 </td>
               </tr>
@@ -297,14 +296,14 @@ function MesTickets({ user, onLogout }) {
             {incidents.length === 0 && (
               <tr>
                 <td
-                  colSpan={6}
+                  colSpan={7}
                   style={{
                     padding: "20px",
                     textAlign: "center",
                     color: "#8a887e",
                   }}
                 >
-                  Aucun ticket qui vous est assigné.
+                  Aucun ticket trouvé.
                 </td>
               </tr>
             )}
@@ -325,4 +324,4 @@ function MesTickets({ user, onLogout }) {
   );
 }
 
-export default MesTickets;
+export default Incidents;

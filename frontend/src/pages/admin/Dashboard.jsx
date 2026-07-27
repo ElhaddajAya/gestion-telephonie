@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../services/api";
-import Layout from "../components/Layout";
-import Pagination from "../components/Pagination";
+import api from "../../services/api";
+import Layout from "../../components/admin/Layout";
+import Pagination from "../../components/Pagination";
 import {
   BarChart,
   Bar,

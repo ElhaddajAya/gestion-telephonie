@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import api from "../services/api";
-import Layout from "../components/Layout";
-import Pagination from "../components/Pagination";
-import ModalModifierAgence from "../components/ModalModifierAgence";
+import api from "../../services/api";
+import Layout from "../../components/admin/Layout";
+import Pagination from "../../components/Pagination";
+import ModalModifierAgence from "../../components/admin/ModalModifierAgence";
 
 function Agences({ user, onLogout }) {
   const [agences, setAgences] = useState([]);

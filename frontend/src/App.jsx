@@ -6,19 +6,19 @@ import {
   Navigate,
   useNavigate,
 } from "react-router-dom";
-import Login from "./pages/Login";
-import ChangePassword from "./pages/ChangePassword";
-import Dashboard from "./pages/Dashboard";
-import Incidents from "./pages/Incidents";
-import MesTickets from "./pages/MesTickets";
-import IncidentDetail from "./pages/IncidentDetail";
-import Agences from "./pages/Agences";
-import AgenceAccueil from "./pages/AgenceAccueil";
-import AgenceTickets from "./pages/AgenceTickets";
-import AgenceTicketDetail from "./pages/AgenceTicketDetail";
-import AgenceDeclarer from "./pages/AgenceDeclarer";
-import Profil from "./pages/Profil";
-import ComptesAdmin from "./pages/ComptesAdmin";
+import Login from "./pages/admin/Login";
+import ChangePassword from "./pages/admin/ChangePassword";
+import Dashboard from "./pages/admin/Dashboard";
+import Incidents from "./pages/admin/Incidents";
+import MesTickets from "./pages/admin/MesTickets";
+import IncidentDetail from "./pages/admin/IncidentDetail";
+import Agences from "./pages/admin/Agences";
+import Profil from "./pages/admin/Profil";
+import ComptesAdmin from "./pages/admin/ComptesAdmin";
+import AgenceAccueil from "./pages/agence/AgenceAccueil";
+import AgenceTickets from "./pages/agence/AgenceTickets";
+import AgenceTicketDetail from "./pages/agence/AgenceTicketDetail";
+import AgenceDeclarer from "./pages/agence/AgenceDeclarer";
 
 // // Dashboard component temporaire pour tester la navigation après le login
 // function Dashboard({ user, onLogout }) {

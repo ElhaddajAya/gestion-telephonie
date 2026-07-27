@@ -1,7 +1,7 @@
 const ExcelJS = require('exceljs');
 const express = require('express');
-const db = require('../db');
-const verifyToken = require('../middleware/auth');
+const db = require('../../db');
+const verifyToken = require('../../middleware/auth');
 const multer = require('multer');
 const XLSX = require('xlsx');
 
