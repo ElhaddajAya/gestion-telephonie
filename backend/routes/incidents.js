@@ -339,8 +339,13 @@ router.put('/:id/assigner', verifyToken, async (req, res) =>
         }
 
         // On reinitialise derniere_lecture : le nouvel admin doit voir tout le fil comme non lu
+        // Et si le ticket etait "ouvert" (personne dessus), l'assignation le fait passer "en_cours"
+        // (mais on ne touche pas a etat s'il etait deja en_cours ou resolu)
         const [result] = await db.query(
-            `UPDATE incident SET traite_par = ?, derniere_lecture = NULL WHERE id = ?`,
+            `UPDATE incident
+             SET traite_par = ?, derniere_lecture = NULL,
+                 etat = IF(etat = 'ouvert', 'en_cours', etat)
+             WHERE id = ?`,
             [idAAssigner, id]
         );
 
