@@ -20,8 +20,10 @@ function MesTickets({ user, onLogout }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    async function charger() {
-      setChargement(true);
+    // premierChargement = true : affiche "Chargement..." (montage, changement de filtre/tri).
+    // Les rafraichissements automatiques suivants se font en silence (meme principe que l'espace agence).
+    async function charger(premierChargement) {
+      if (premierChargement) setChargement(true);
       try {
         const res = await api.get("/incidents", {
           params: {
@@ -35,14 +37,16 @@ function MesTickets({ user, onLogout }) {
           },
         });
         setIncidents(res.data);
-        setPage(1);
+        if (premierChargement) setPage(1);
       } catch (error) {
         console.error("Erreur chargement de mes tickets :", error);
       } finally {
-        setChargement(false);
+        if (premierChargement) setChargement(false);
       }
     }
-    charger();
+    charger(true);
+    const intervalle = setInterval(() => charger(false), 15000);
+    return () => clearInterval(intervalle);
   }, [recherche, filtreEtat, filtreType, filtrePriorite, filtreDate, tri]);
 
   const incidentsPage = incidents.slice(
@@ -244,7 +248,21 @@ function MesTickets({ user, onLogout }) {
                     padding: "clamp(12px, 1vw, 18px) clamp(16px, 1.2vw, 22px)",
                   }}
                 >
-                  {inc.titre}
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
+                    {inc.titre}
+                    {!!inc.nouveau && (
+                      <span
+                        title='Nouveau message'
+                        style={{
+                          width: "8px",
+                          height: "8px",
+                          borderRadius: "50%",
+                          background: "#e41e3f",
+                          flexShrink: 0,
+                        }}
+                      />
+                    )}
+                  </span>
                 </td>
                 <td
                   style={{

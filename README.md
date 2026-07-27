@@ -57,7 +57,7 @@ gestion-telephonie/
 - **Tableau de bord** : statistiques (tickets ouverts, en cours, urgents, résolus), répartition par type/succursale, temps moyen de résolution.
 - **Liste des tickets** (tous / "Mes tickets") avec recherche, filtres (état, type, priorité, date) et tri.
 - **Détail d'un ticket** : fil de discussion en bulles de chat (admin ↔ agence), rafraîchi automatiquement, informations agence modifiables, changement d'état, assignation/réassignation.
-- **Notifications** : cloche avec badge pour les nouveaux tickets et les nouvelles réponses sur les tickets assignés à l'admin connecté (statut lu/non-lu suivi en base, pas de compte requis pour l'agence). Côté agence, un badge "Nouveau" (liste et accueil) signale une réponse d'admin ou une assignation depuis sa dernière visite du ticket — même principe, sans email pour l'instant (voir `docs/notifications-messages.md`).
+- **Notifications** : cloche avec badge pour les nouveaux tickets et les nouvelles réponses sur les tickets assignés à l'admin connecté (statut lu/non-lu suivi en base, pas de compte requis pour l'agence). Un point rouge signale aussi les tickets avec du nouveau, ligne par ligne : sur "Mes tickets" côté admin, et sur la liste/l'accueil côté agence (réponse d'admin ou assignation depuis sa dernière visite) — sans email pour l'instant (voir `docs/notifications-messages.md`).
 - **Gestion des agences** : liste, export Excel, import/mise à jour en masse via fichier Excel.
 
 ## Installation

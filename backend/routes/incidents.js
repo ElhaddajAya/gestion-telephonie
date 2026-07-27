@@ -129,9 +129,17 @@ router.get('/', verifyToken, async (req, res) =>
     try
     {
         // On construit la requete dynamiquement selon les filtres presents
+        // "nouveau" : un message d'agence existe et n'a pas encore ete lu par l'admin assigne
+        // (meme condition que la cloche /commentaires-recents, mais calculee par ticket)
         let sql = `
       SELECT i.*, a.nom AS nom_agence, a.succursale,
-             u.nom AS nom_admin, u.prenom AS prenom_admin
+             u.nom AS nom_admin, u.prenom AS prenom_admin,
+             EXISTS (
+               SELECT 1 FROM commentaire c
+               WHERE c.incident_id = i.id
+                 AND c.auteur_agence_code IS NOT NULL
+                 AND (i.derniere_lecture IS NULL OR c.date_creation > i.derniere_lecture)
+             ) AS nouveau
       FROM incident i
       JOIN agence a ON i.code_agence = a.code_agence
       LEFT JOIN utilisateur u ON i.traite_par = u.id

@@ -52,3 +52,22 @@ ADD COLUMN derniere_lecture_agence DATETIME NULL;
 - Le badge "Nouveau" (liste "Mes tickets" et accueil) s'affiche si `derniere_maj` est plus récente que `derniere_lecture_agence` (calculé directement en SQL dans `GET /api/espace-agence/:code/tickets` et `.../incidents-recents`).
 
 **Pourquoi pas un email à chaque message ?** Pour éviter de solliciter le SMTP à chaque échange du fil de discussion (et d'inonder l'agence de mails), l'email (une fois le SMTP débloqué) est réservé aux événements marquants comme l'assignation — pas aux messages un par un, qui restent couverts uniquement par ce badge in-app, sans coût d'envoi.
+
+## Le même point rouge côté admin ("Mes tickets")
+
+Même logique, mais l'info existe déjà : `derniere_lecture` (lu/non lu par l'admin assigné) et les commentaires d'agence sont déjà en base, donc pas de nouvelle colonne nécessaire.
+
+`GET /api/incidents` (utilisée par `MesTickets.jsx`) calcule un champ `nouveau` par ticket :
+
+```sql
+EXISTS (
+  SELECT 1 FROM commentaire c
+  WHERE c.incident_id = i.id
+    AND c.auteur_agence_code IS NOT NULL
+    AND (i.derniere_lecture IS NULL OR c.date_creation > i.derniere_lecture)
+) AS nouveau
+```
+
+C'est exactement la même condition que `/commentaires-recents` (la cloche), juste calculée ticket par ticket plutôt qu'en liste globale.
+
+**Uniquement sur "Mes tickets", pas sur "Tous les tickets"** : sur "Mes tickets", chaque ligne appartient à l'admin connecté, donc `derniere_lecture` le concerne directement. Sur "Tous les tickets", certaines lignes appartiennent à d'autres admins — afficher un point basé sur leur lecture à eux serait trompeur pour la personne qui regarde l'écran.
