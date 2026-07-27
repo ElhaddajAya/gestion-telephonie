@@ -20,7 +20,7 @@ Une agence déclare un incident téléphonique (ligne coupée, standard inaccess
 
 ## Rôles
 
-- **Agence** — pas de compte : accède à son formulaire de déclaration via un lien unique (`/agence/<code_agence>`), sans mot de passe. Justifié par l'absence de données confidentielles et un accès réseau strictement interne.
+- **Agence** — pas de compte : accède à son formulaire de déclaration via un lien unique (`teletrack.bcp.ma/agence/<code_agence>`), sans mot de passe. Justifié par l'absence de données confidentielles et un accès réseau strictement interne.
 - **Admin** — connexion par matricule/mot de passe, traite les incidents, dispose d'un tableau de bord.
 - **Superadmin** — en plus des droits admin, gère les comptes admin.
 
@@ -32,18 +32,19 @@ gestion-telephonie/
 │   ├── routes/
 │   │   ├── auth.js          # login, changement de mot de passe
 │   │   ├── incidents.js     # CRUD incidents, commentaires, stats, notifications
-│   │   ├── agences.js       # liste, détail, modification, import/export Excel
+│   │   ├── agences.js       # liste, détail, modification, import/export/modèle Excel
 │   │   └── utilisateurs.js  # liste des admins (pour la réassignation)
 │   ├── middleware/auth.js   # verification du token JWT
+│   ├── services/mailer.js   # envoi d'email (no-op tant que le SMTP n'est pas configuré)
 │   ├── db.js                # pool de connexion MySQL
 │   └── server.js
-├── frontend/
-│   └── src/
-│       ├── pages/           # Login, ChangePassword, Dashboard, Incidents,
-│       │                    # MesTickets, IncidentDetail
-│       ├── components/      # Layout (sidebar + header), Badge, Pagination,
-│       │                    # ModalReassigner
-│       └── services/        # api.js (instance axios + intercepteurs)
+└── frontend/
+    └── src/
+        ├── pages/           # Login, ChangePassword, Dashboard, Incidents,
+        │                    # MesTickets, IncidentDetail, Agences
+        ├── components/      # Layout (sidebar + header), Badge, Pagination,
+        │                    # ModalReassigner, ModalModifierAgence
+        └── services/        # api.js (instance axios + intercepteurs)
 ```
 
 ## Fonctionnalités principales
@@ -89,12 +90,13 @@ Démarre sur `http://localhost:5173`.
 
 ### Variables d'environnement (`backend/.env`)
 
-| Variable                                       | Rôle                                         |
-| ---------------------------------------------- | -------------------------------------------- |
-| `PORT`                                         | Port du serveur Express                      |
-| `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` | Connexion MySQL                              |
-| `JWT_SECRET`                                   | Clé de signature des tokens JWT              |
-| `FRONTEND_URL`                                 | Origine autorisée par CORS (URL du frontend) |
+| Variable                                                        | Rôle                                                                                                                        |
+| --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `PORT`                                                          | Port du serveur Express                                                                                                     |
+| `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`                  | Connexion MySQL                                                                                                             |
+| `JWT_SECRET`                                                    | Clé de signature des tokens JWT                                                                                             |
+| `FRONTEND_URL`                                                  | Origine autorisée par CORS (URL du frontend)                                                                                |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` | Notifications par email — optionnel, laissé vide tant que l'accès SMTP n'est pas fourni (voir`docs/changements-recents.md`) |
 
 ## Développeuse
 
