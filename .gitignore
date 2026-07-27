@@ -38,3 +38,6 @@ coverage/
 # Misc
 *.tmp
 *.temp
+
+# Fichiers uploades par les utilisateurs (photos de profil)
+backend/uploads/

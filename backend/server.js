@@ -2,6 +2,7 @@
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
+const path = require('path');
 require('dotenv').config();
 const db = require('./db');
 
@@ -9,6 +10,8 @@ const app = express();
 // N'accepte les requetes que depuis le frontend (evite qu'un site tiers appelle notre API depuis le navigateur d'un admin connecte)
 app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173' }));
 app.use(express.json());
+// Sert les fichiers uploades (photos de profil) de maniere statique : /uploads/avatars/xxx.jpg
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
@@ -49,7 +52,8 @@ app.use((err, req, res, next) =>
 {
     if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE')
     {
-        return res.status(400).json({ message: 'Fichier trop volumineux (5 Mo maximum).' });
+        const limite = err.field === 'photo' ? '2 Mo' : '5 Mo';
+        return res.status(400).json({ message: `Fichier trop volumineux (${limite} maximum).` });
     }
     next(err);
 });

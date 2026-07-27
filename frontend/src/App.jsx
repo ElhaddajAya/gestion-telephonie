@@ -17,6 +17,8 @@ import AgenceAccueil from "./pages/AgenceAccueil";
 import AgenceTickets from "./pages/AgenceTickets";
 import AgenceTicketDetail from "./pages/AgenceTicketDetail";
 import AgenceDeclarer from "./pages/AgenceDeclarer";
+import Profil from "./pages/Profil";
+import ComptesAdmin from "./pages/ComptesAdmin";
 
 // // Dashboard component temporaire pour tester la navigation après le login
 // function Dashboard({ user, onLogout }) {
@@ -74,6 +76,12 @@ function AppRoutes() {
     } else {
       navigate("/", { replace: true }); // replace: true -> impossible de revenir sur la page de login avec le bouton <--
     }
+  };
+
+  // Appele apres une modification du profil (infos ou photo) : met a jour le state et le localStorage
+  // sans avoir a se reconnecter, pour que Layout.jsx reflete immediatement les changements
+  const handleUserUpdate = (userData) => {
+    setUser(userData);
   };
 
   const handleLogout = () => {
@@ -215,6 +223,44 @@ function AppRoutes() {
             />
           ) : (
             <IncidentDetail
+              user={user}
+              onLogout={handleLogout}
+            />
+          )
+        }
+      />
+      <Route
+        path='/profil'
+        element={
+          !user ? (
+            <Navigate
+              to='/login'
+              replace
+            />
+          ) : (
+            <Profil
+              user={user}
+              onLogout={handleLogout}
+              onUserUpdate={handleUserUpdate}
+            />
+          )
+        }
+      />
+      <Route
+        path='/comptes-admin'
+        element={
+          !user ? (
+            <Navigate
+              to='/login'
+              replace
+            />
+          ) : user.role !== 'superadmin' ? (
+            <Navigate
+              to='/'
+              replace
+            />
+          ) : (
+            <ComptesAdmin
               user={user}
               onLogout={handleLogout}
             />

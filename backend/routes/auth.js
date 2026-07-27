@@ -1,6 +1,9 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const path = require('path');
+const fs = require('fs');
+const multer = require('multer');
 const db = require('../db');
 
 const router = express.Router();
@@ -83,6 +86,106 @@ router.put('/change-password', jwtMiddleware, async (req, res) =>
         );
 
         res.json({ message: 'Mot de passe mis à jour avec succès.' });
+    } catch (error)
+    {
+        res.status(500).json({ message: 'Erreur serveur', erreur: error.message });
+    }
+});
+
+// GET /api/auth/me
+// Route protegee : profil complet de l'utilisateur connecte, pour la page "Mon profil"
+router.get('/me', jwtMiddleware, async (req, res) =>
+{
+    try
+    {
+        const [rows] = await db.query(
+            'SELECT id, nom, prenom, matricule, email, role, photo FROM utilisateur WHERE id = ?',
+            [req.user.id]
+        );
+
+        if (rows.length === 0)
+        {
+            return res.status(404).json({ message: 'Utilisateur introuvable.' });
+        }
+
+        res.json(rows[0]);
+    } catch (error)
+    {
+        res.status(500).json({ message: 'Erreur serveur', erreur: error.message });
+    }
+});
+
+// PUT /api/auth/profil
+// Route protegee : modifie son propre nom/prenom/email (matricule et role ne sont pas modifiables ici)
+router.put('/profil', jwtMiddleware, async (req, res) =>
+{
+    const { nom, prenom, email } = req.body;
+
+    if (!nom || !prenom)
+    {
+        return res.status(400).json({ message: 'Nom et prénom obligatoires.' });
+    }
+
+    try
+    {
+        await db.query(
+            'UPDATE utilisateur SET nom = ?, prenom = ?, email = ? WHERE id = ?',
+            [nom, prenom, email || null, req.user.id]
+        );
+
+        const [rows] = await db.query(
+            'SELECT id, nom, prenom, matricule, email, role, photo FROM utilisateur WHERE id = ?',
+            [req.user.id]
+        );
+
+        res.json({ message: 'Profil mis à jour avec succès.', user: rows[0] });
+    } catch (error)
+    {
+        res.status(500).json({ message: 'Erreur serveur', erreur: error.message });
+    }
+});
+
+// Stockage sur disque pour les photos de profil : contrairement a l'import Excel (traite en memoire
+// puis jete), une photo doit rester disponible pour etre reaffichee plus tard
+const dossierAvatars = path.join(__dirname, '..', 'uploads', 'avatars');
+fs.mkdirSync(dossierAvatars, { recursive: true });
+
+const TYPES_IMAGE_ACCEPTES = ['image/jpeg', 'image/png', 'image/webp'];
+
+const uploadAvatar = multer({
+    storage: multer.diskStorage({
+        destination: (req, file, cb) => cb(null, dossierAvatars),
+        filename: (req, file, cb) => cb(null, `${req.user.id}-${Date.now()}${path.extname(file.originalname)}`),
+    }),
+    limits: { fileSize: 2 * 1024 * 1024 }, // 2 Mo : largement suffisant pour un avatar
+});
+
+// POST /api/auth/photo
+// Route protegee : upload/remplacement de la photo de profil de l'utilisateur connecte
+router.post('/photo', jwtMiddleware, uploadAvatar.single('photo'), async (req, res) =>
+{
+    if (!req.file)
+    {
+        return res.status(400).json({ message: 'Aucun fichier reçu.' });
+    }
+    if (!TYPES_IMAGE_ACCEPTES.includes(req.file.mimetype))
+    {
+        fs.unlink(req.file.path, () => {}); // fichier refuse, on nettoie
+        return res.status(400).json({ message: 'Format invalide : seules les images JPEG, PNG ou WEBP sont acceptées.' });
+    }
+
+    try
+    {
+        // On supprime l'ancienne photo (si elle existe) pour ne pas accumuler des fichiers orphelins
+        const [[utilisateurActuel]] = await db.query('SELECT photo FROM utilisateur WHERE id = ?', [req.user.id]);
+        if (utilisateurActuel?.photo)
+        {
+            fs.unlink(path.join(dossierAvatars, utilisateurActuel.photo), () => {});
+        }
+
+        await db.query('UPDATE utilisateur SET photo = ? WHERE id = ?', [req.file.filename, req.user.id]);
+
+        res.json({ message: 'Photo mise à jour avec succès.', photo: req.file.filename });
     } catch (error)
     {
         res.status(500).json({ message: 'Erreur serveur', erreur: error.message });

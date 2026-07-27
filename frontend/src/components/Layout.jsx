@@ -15,6 +15,15 @@ function Layout({ user, children, onLogout }) {
     ? `${(user.prenom || "").charAt(0)}${(user.nom || "").charAt(0)}`.toUpperCase()
     : "";
 
+  // Origine du backend (sans le "/api" final), pour construire l'URL des photos de profil
+  const origineApi = (import.meta.env.VITE_API_URL || "").replace(
+    /\/api\/?$/,
+    "",
+  );
+  const urlPhoto = user?.photo
+    ? `${origineApi}/uploads/avatars/${user.photo}`
+    : null;
+
   useEffect(() => {
     async function chargerAlertes() {
       try {
@@ -42,9 +51,7 @@ function Layout({ user, children, onLogout }) {
     : location.pathname;
 
   const isActive = (path) =>
-    path === "/"
-      ? cheminEffectif === "/"
-      : cheminEffectif.startsWith(path);
+    path === "/" ? cheminEffectif === "/" : cheminEffectif.startsWith(path);
 
   const navItemStyle = (active) => ({
     padding: "clamp(10px, 0.7vw, 14px) clamp(12px, 0.9vw, 18px)",
@@ -117,6 +124,14 @@ function Layout({ user, children, onLogout }) {
         >
           Agences
         </Link>
+        {user?.role === "superadmin" && (
+          <Link
+            to='/comptes-admin'
+            style={navItemStyle(isActive("/comptes-admin"))}
+          >
+            Comptes utilisateurs
+          </Link>
+        )}
         <Link
           to='/profil'
           style={navItemStyle(isActive("/profil"))}
@@ -189,12 +204,30 @@ function Layout({ user, children, onLogout }) {
                   fontSize: "clamp(14px, 0.98vw, 16px)",
                   color: "#2b2a26",
                   fontFamily: "'Montserrat', sans-serif",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
                 }}
               >
                 Bienvenue,{" "}
                 <strong>
                   {user?.prenom} {user?.nom}
                 </strong>
+                {user?.role === "superadmin" && (
+                  <span
+                    style={{
+                      fontSize: "10px",
+                      fontWeight: 700,
+                      color: "#4b0700",
+                      background: "#f4f4f4",
+                      padding: "3px 9px",
+                      borderRadius: "10px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Superadmin
+                  </span>
+                )}
               </div>
               <div
                 style={{
@@ -210,9 +243,22 @@ function Layout({ user, children, onLogout }) {
                   fontSize: "clamp(14px, 0.98vw, 16px)",
                   fontFamily: "'Montserrat', sans-serif",
                   flexShrink: 0,
+                  overflow: "hidden",
                 }}
               >
-                {initiales}
+                {urlPhoto ? (
+                  <img
+                    src={urlPhoto}
+                    alt='Photo de profil'
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                ) : (
+                  initiales
+                )}
               </div>
             </div>
 

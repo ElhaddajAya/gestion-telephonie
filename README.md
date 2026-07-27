@@ -30,19 +30,20 @@ Une agence déclare un incident téléphonique (ligne coupée, standard inaccess
 gestion-telephonie/
 ├── backend/
 │   ├── routes/
-│   │   ├── auth.js          # login, changement de mot de passe
+│   │   ├── auth.js          # login, changement de mot de passe, profil (infos + photo)
 │   │   ├── incidents.js     # CRUD incidents, commentaires, stats, notifications
 │   │   ├── agences.js       # liste, détail, modification, import/export/modèle Excel
-│   │   ├── utilisateurs.js  # liste des admins (pour la réassignation)
+│   │   ├── utilisateurs.js  # liste des admins (réassignation, page "Comptes admin")
 │   │   └── espaceAgence.js  # espace agence PUBLIC (infos, stats, tickets, détail — pas de token)
 │   ├── middleware/auth.js   # verification du token JWT
 │   ├── services/mailer.js   # envoi d'email (no-op tant que le SMTP n'est pas configuré)
+│   ├── uploads/avatars/     # photos de profil uploadées (ignoré par git)
 │   ├── db.js                # pool de connexion MySQL
 │   └── server.js
 └── frontend/
     └── src/
         ├── pages/           # Login, ChangePassword, Dashboard, Incidents,
-        │                    # MesTickets, IncidentDetail, Agences,
+        │                    # MesTickets, IncidentDetail, Agences, Profil, ComptesAdmin,
         │                    # AgenceAccueil, AgenceTickets, AgenceTicketDetail,
         │                    # AgenceDeclarer
         ├── components/      # Layout (sidebar + header), Badge, Pagination,
@@ -59,6 +60,8 @@ gestion-telephonie/
 - **Détail d'un ticket** : fil de discussion en bulles de chat (admin ↔ agence), rafraîchi automatiquement, informations agence modifiables, changement d'état, assignation/réassignation.
 - **Notifications** : cloche avec badge pour les nouveaux tickets et les nouvelles réponses sur les tickets assignés à l'admin connecté (statut lu/non-lu suivi en base, pas de compte requis pour l'agence). Un point rouge signale aussi les tickets avec du nouveau, ligne par ligne : sur "Mes tickets" côté admin, et sur la liste/l'accueil côté agence (réponse d'admin ou assignation depuis sa dernière visite) — sans email pour l'instant (voir `docs/notifications-messages.md`).
 - **Gestion des agences** : liste, export Excel, import/mise à jour en masse via fichier Excel.
+- **Mon profil** (`/profil`) : consultation et modification de son nom/prénom/email, changement de mot de passe, upload d'une photo de profil (JPEG/PNG/WEBP, 2 Mo max).
+- **Distinction admin / superadmin** : badge "Superadmin" affiché dans l'en-tête et lien "Comptes admin" visible uniquement pour les superadmins (liste en lecture seule pour l'instant — la gestion complète des comptes, Epic 5, reste à construire).
 
 ## Installation
 
