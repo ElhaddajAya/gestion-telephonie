@@ -428,6 +428,14 @@ function IncidentDetail({ user, onLogout }) {
                 {new Date(incident.date_creation).toLocaleDateString("fr-FR")}
               </b>
             </div>
+            {incident.etat === "resolu" && incident.date_resolution && (
+              <div style={infoLine}>
+                <span>Résolu le</span>
+                <b style={{ color: "#1e7d34" }}>
+                  {new Date(incident.date_resolution).toLocaleDateString("fr-FR")}
+                </b>
+              </div>
+            )}
 
             <label
               style={{

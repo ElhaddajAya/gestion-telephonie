@@ -14,6 +14,7 @@ import MesTickets from "./pages/MesTickets";
 import IncidentDetail from "./pages/IncidentDetail";
 import Agences from "./pages/Agences";
 import AgenceAccueil from "./pages/AgenceAccueil";
+import AgenceTickets from "./pages/AgenceTickets";
 import AgenceTicketDetail from "./pages/AgenceTicketDetail";
 
 // // Dashboard component temporaire pour tester la navigation après le login
@@ -90,6 +91,10 @@ function AppRoutes() {
       <Route
         path='/agence/:code'
         element={<AgenceAccueil />}
+      />
+      <Route
+        path='/agence/:code/tickets'
+        element={<AgenceTickets />}
       />
       <Route
         path='/agence/:code/tickets/:id'

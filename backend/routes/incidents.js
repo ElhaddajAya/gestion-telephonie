@@ -156,8 +156,8 @@ router.get('/', verifyToken, async (req, res) =>
         }
         if (agence)
         {
-            sql += ' AND (a.nom LIKE ? OR i.code_agence LIKE ?)';
-            params.push(`%${agence}%`, `%${agence}%`);
+            sql += ' AND (a.nom LIKE ? OR i.code_agence LIKE ? OR i.titre LIKE ?)';
+            params.push(`%${agence}%`, `%${agence}%`, `%${agence}%`);
         }
         if (date)
         {

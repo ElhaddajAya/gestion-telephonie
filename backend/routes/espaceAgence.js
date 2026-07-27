@@ -87,6 +87,51 @@ router.get('/:code/incidents-recents', async (req, res) =>
     }
 });
 
+// GET /api/espace-agence/:code/tickets
+// Liste complete des tickets de cette agence, filtrable par etat/type/priorite/recherche (titre)
+// et triable par date de declaration (tri=asc|desc, desc par defaut)
+router.get('/:code/tickets', async (req, res) =>
+{
+    const { code } = req.params;
+    const { etat, type, priorite, recherche, tri } = req.query;
+
+    try
+    {
+        let sql = 'SELECT id, titre, type, priorite, etat, date_creation FROM incident WHERE code_agence = ?';
+        const params = [code];
+
+        if (etat)
+        {
+            sql += ' AND etat = ?';
+            params.push(etat);
+        }
+        if (type)
+        {
+            sql += ' AND type = ?';
+            params.push(type);
+        }
+        if (priorite)
+        {
+            sql += ' AND priorite = ?';
+            params.push(priorite);
+        }
+        if (recherche)
+        {
+            sql += ' AND titre LIKE ?';
+            params.push(`%${recherche}%`);
+        }
+
+        const direction = tri === 'asc' ? 'ASC' : 'DESC';
+        sql += ` ORDER BY date_creation ${direction}`;
+
+        const [rows] = await db.query(sql, params);
+        res.json(rows);
+    } catch (error)
+    {
+        res.status(500).json({ message: 'Erreur serveur', erreur: error.message });
+    }
+});
+
 // GET /api/espace-agence/:code/tickets/:id
 // Detail d'un ticket + son fil de commentaires — uniquement si ce ticket appartient bien
 // a l'agence "code" de l'URL (empeche de consulter le ticket d'une autre agence en devinant l'id)
@@ -124,6 +169,48 @@ router.get('/:code/tickets/:id', async (req, res) =>
         );
 
         res.json({ ...incident, commentaires });
+    } catch (error)
+    {
+        res.status(500).json({ message: 'Erreur serveur', erreur: error.message });
+    }
+});
+
+// PUT /api/espace-agence/:code/tickets/:id/etat
+// L'agence peut UNIQUEMENT marquer un ticket comme resolu, ou rouvrir un ticket qu'elle avait
+// deja marque resolu (repasse a "ouvert"). Toute autre valeur est refusee : le passage a
+// "en_cours" reste reserve a l'admin (ca signifie "un admin s'en occupe").
+router.put('/:code/tickets/:id/etat', async (req, res) =>
+{
+    const { code, id } = req.params;
+    const { etat } = req.body;
+
+    if (!['resolu', 'ouvert'].includes(etat))
+    {
+        return res.status(400).json({ message: 'L\'agence peut seulement marquer un ticket comme résolu ou le rouvrir.' });
+    }
+
+    try
+    {
+        // On verifie d'abord que ce ticket appartient bien a cette agence
+        const [incidents] = await db.query(
+            'SELECT id FROM incident WHERE id = ? AND code_agence = ?',
+            [id, code]
+        );
+
+        if (incidents.length === 0)
+        {
+            return res.status(404).json({ message: 'Ticket introuvable.' });
+        }
+
+        // Si on rouvre, on efface la date de resolution ; si on resout, on l'enregistre
+        const dateResolution = etat === 'resolu' ? new Date() : null;
+
+        await db.query(
+            'UPDATE incident SET etat = ?, date_resolution = ? WHERE id = ?',
+            [etat, dateResolution, id]
+        );
+
+        res.json({ message: 'État mis à jour avec succès.' });
     } catch (error)
     {
         res.status(500).json({ message: 'Erreur serveur', erreur: error.message });

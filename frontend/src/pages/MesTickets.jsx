@@ -94,7 +94,7 @@ function MesTickets({ user, onLogout }) {
       >
         <input
           type='text'
-          placeholder='Rechercher une agence, un code...'
+          placeholder='Rechercher une agence, un code, un titre...'
           value={recherche}
           onChange={(e) => setRecherche(e.target.value)}
           style={{ ...inputStyle, flex: 1, minWidth: "200px" }}

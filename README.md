@@ -26,7 +26,7 @@ Une agence déclare un incident téléphonique (ligne coupée, standard inaccess
 
 ## Structure du projet
 
-```
+```text
 gestion-telephonie/
 ├── backend/
 │   ├── routes/
@@ -43,7 +43,7 @@ gestion-telephonie/
     └── src/
         ├── pages/           # Login, ChangePassword, Dashboard, Incidents,
         │                    # MesTickets, IncidentDetail, Agences,
-        │                    # AgenceAccueil, AgenceTicketDetail
+        │                    # AgenceAccueil, AgenceTickets, AgenceTicketDetail
         ├── components/      # Layout (sidebar + header), Badge, Pagination,
         │                    # ModalReassigner, ModalModifierAgence
         └── services/        # api.js (admin, avec token) ; apiPublic.js (espace agence, sans token)
@@ -51,7 +51,7 @@ gestion-telephonie/
 
 ## Fonctionnalités principales
 
-- **Espace agence** (`/agence/:code`, public, sans compte) : page d'accueil avec identité de l'agence, aperçu chiffré (ouverts/en cours/résolus), accès direct à la déclaration et aux tickets récents ; page de détail d'un ticket avec fil de discussion (l'agence peut répondre), scopée à sa propre agence.
+- **Espace agence** (`/agence/:code`, public, sans compte) : page d'accueil (identité, aperçu chiffré, tickets récents), liste complète "Mes tickets" avec filtres (état, type, priorité), et détail d'un ticket avec fil de discussion (l'agence peut répondre) — le tout scopé à sa propre agence. L'agence peut aussi marquer un ticket comme résolu ou le rouvrir (le passage à "en cours" reste réservé à l'admin).
 - **Déclaration d'incident** par l'agence (titre, type interne/externe, priorité, description).
 - **Tableau de bord** : statistiques (tickets ouverts, en cours, urgents, résolus), répartition par type/succursale, temps moyen de résolution.
 - **Liste des tickets** (tous / "Mes tickets") avec recherche, filtres (état, type, priorité, date) et tri.

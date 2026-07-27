@@ -49,6 +49,17 @@ function AgenceTicketDetail() {
     }
   };
 
+  const changerEtat = async (nouvelEtat) => {
+    try {
+      await api.put(`/espace-agence/${code}/tickets/${id}/etat`, {
+        etat: nouvelEtat,
+      });
+      charger();
+    } catch (error) {
+      console.error("Erreur changement état :", error);
+    }
+  };
+
   const conteneurStyle = {
     minHeight: "100vh",
     background: "#f4f4f4",
@@ -147,10 +158,64 @@ function AgenceTicketDetail() {
         >
           {incident.titre}
         </h1>
-        <div style={{ display: "flex", gap: "8px", marginBottom: "22px" }}>
-          <Badge valeur={incident.type} />
-          <Badge valeur={incident.priorite} />
-          <Badge valeur={incident.etat} />
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: "12px",
+            marginBottom: "22px",
+          }}
+        >
+          <div style={{ display: "flex", gap: "8px" }}>
+            <Badge valeur={incident.type} />
+            <Badge valeur={incident.priorite} />
+            <Badge valeur={incident.etat} />
+          </div>
+          {incident.etat === "resolu" ? (
+            <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+              {incident.date_resolution && (
+                <span style={{ fontSize: "13px", color: "#1e7d34" }}>
+                  Résolu le{" "}
+                  {new Date(incident.date_resolution).toLocaleDateString("fr-FR")}
+                </span>
+              )}
+              <button
+                onClick={() => changerEtat("ouvert")}
+                style={{
+                  padding: "10px 18px",
+                  background: "#fff",
+                  color: "#f77100",
+                  border: "1.5px solid #f77100",
+                  borderRadius: "6px",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  fontFamily: "'Montserrat', sans-serif",
+                }}
+              >
+                Rouvrir ce ticket
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => changerEtat("resolu")}
+              style={{
+                padding: "10px 18px",
+                background: "#1e7d34",
+                color: "#fff",
+                border: "none",
+                borderRadius: "6px",
+                fontSize: "13px",
+                fontWeight: 600,
+                cursor: "pointer",
+                fontFamily: "'Montserrat', sans-serif",
+              }}
+            >
+              Marquer comme résolu
+            </button>
+          )}
         </div>
 
         {/* Description */}
