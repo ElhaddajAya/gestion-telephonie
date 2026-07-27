@@ -22,6 +22,9 @@ app.use('/api/agences', agencesRoutes);
 const utilisateursRoutes = require('./routes/utilisateurs');
 app.use('/api/utilisateurs', utilisateursRoutes);
 
+const espaceAgenceRoutes = require('./routes/espaceAgence');
+app.use('/api/espace-agence', espaceAgenceRoutes);
+
 app.get('/api/test', (req, res) =>
 {
     res.json({ message: 'Le serveur backend fonctionne !' });

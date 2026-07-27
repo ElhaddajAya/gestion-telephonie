@@ -13,6 +13,8 @@ import Incidents from "./pages/Incidents";
 import MesTickets from "./pages/MesTickets";
 import IncidentDetail from "./pages/IncidentDetail";
 import Agences from "./pages/Agences";
+import AgenceAccueil from "./pages/AgenceAccueil";
+import AgenceTicketDetail from "./pages/AgenceTicketDetail";
 
 // // Dashboard component temporaire pour tester la navigation après le login
 // function Dashboard({ user, onLogout }) {
@@ -84,6 +86,15 @@ function AppRoutes() {
 
   return (
     <Routes>
+      {/* Espace agence : public, aucune authentification (accessible via le lien unique de l'agence) */}
+      <Route
+        path='/agence/:code'
+        element={<AgenceAccueil />}
+      />
+      <Route
+        path='/agence/:code/tickets/:id'
+        element={<AgenceTicketDetail />}
+      />
       <Route
         path='/login'
         element={

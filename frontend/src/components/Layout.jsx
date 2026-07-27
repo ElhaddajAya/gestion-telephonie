@@ -167,7 +167,7 @@ function Layout({ user, children, onLogout }) {
           <img
             src='/logo_bp.png'
             alt='Banque Populaire'
-            style={{ height: "clamp(40px, 3vw, 52px)" }}
+            style={{ height: "clamp(44px, 3.3vw, 58px)" }}
           />
 
           <div
@@ -186,7 +186,7 @@ function Layout({ user, children, onLogout }) {
             >
               <div
                 style={{
-                  fontSize: "clamp(13px, 0.9vw, 15px)",
+                  fontSize: "clamp(14px, 0.98vw, 16px)",
                   color: "#2b2a26",
                   fontFamily: "'Montserrat', sans-serif",
                 }}
@@ -198,8 +198,8 @@ function Layout({ user, children, onLogout }) {
               </div>
               <div
                 style={{
-                  width: "clamp(34px, 2.4vw, 40px)",
-                  height: "clamp(34px, 2.4vw, 40px)",
+                  width: "clamp(37px, 2.6vw, 44px)",
+                  height: "clamp(37px, 2.6vw, 44px)",
                   borderRadius: "50%",
                   background: "#f77100",
                   color: "#fff",
@@ -207,7 +207,7 @@ function Layout({ user, children, onLogout }) {
                   alignItems: "center",
                   justifyContent: "center",
                   fontWeight: 700,
-                  fontSize: "clamp(13px, 0.9vw, 15px)",
+                  fontSize: "clamp(14px, 0.98vw, 16px)",
                   fontFamily: "'Montserrat', sans-serif",
                   flexShrink: 0,
                 }}
@@ -223,11 +223,11 @@ function Layout({ user, children, onLogout }) {
                 cursor: "pointer",
                 background: "#f4f4f4",
                 borderRadius: "10px",
-                padding: "clamp(9px, 0.7vw, 12px)",
+                padding: "clamp(10px, 0.78vw, 13px)",
               }}
             >
               <HiOutlineBell
-                size={20}
+                size={22}
                 color='#4b0700'
               />
               {nouveaux.length + nouveauxMessages.length > 0 && (

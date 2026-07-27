@@ -33,7 +33,8 @@ gestion-telephonie/
 │   │   ├── auth.js          # login, changement de mot de passe
 │   │   ├── incidents.js     # CRUD incidents, commentaires, stats, notifications
 │   │   ├── agences.js       # liste, détail, modification, import/export/modèle Excel
-│   │   └── utilisateurs.js  # liste des admins (pour la réassignation)
+│   │   ├── utilisateurs.js  # liste des admins (pour la réassignation)
+│   │   └── espaceAgence.js  # espace agence PUBLIC (infos, stats, tickets, détail — pas de token)
 │   ├── middleware/auth.js   # verification du token JWT
 │   ├── services/mailer.js   # envoi d'email (no-op tant que le SMTP n'est pas configuré)
 │   ├── db.js                # pool de connexion MySQL
@@ -41,14 +42,16 @@ gestion-telephonie/
 └── frontend/
     └── src/
         ├── pages/           # Login, ChangePassword, Dashboard, Incidents,
-        │                    # MesTickets, IncidentDetail, Agences
+        │                    # MesTickets, IncidentDetail, Agences,
+        │                    # AgenceAccueil, AgenceTicketDetail
         ├── components/      # Layout (sidebar + header), Badge, Pagination,
         │                    # ModalReassigner, ModalModifierAgence
-        └── services/        # api.js (instance axios + intercepteurs)
+        └── services/        # api.js (admin, avec token) ; apiPublic.js (espace agence, sans token)
 ```
 
 ## Fonctionnalités principales
 
+- **Espace agence** (`/agence/:code`, public, sans compte) : page d'accueil avec identité de l'agence, aperçu chiffré (ouverts/en cours/résolus), accès direct à la déclaration et aux tickets récents ; page de détail d'un ticket avec fil de discussion (l'agence peut répondre), scopée à sa propre agence.
 - **Déclaration d'incident** par l'agence (titre, type interne/externe, priorité, description).
 - **Tableau de bord** : statistiques (tickets ouverts, en cours, urgents, résolus), répartition par type/succursale, temps moyen de résolution.
 - **Liste des tickets** (tous / "Mes tickets") avec recherche, filtres (état, type, priorité, date) et tri.
