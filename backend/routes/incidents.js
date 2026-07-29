@@ -81,6 +81,7 @@ router.get('/stats-detaillees', verifyToken, async (req, res) =>
     try
     {
         // Temps moyen de resolution (en heures), uniquement sur les incidents resolus
+        // on calcule la difference entre date_creation et date_resolution, en minutes (puis en heures cote frontend)
         const [[tempsResolution]] = await db.query(`
       SELECT AVG(TIMESTAMPDIFF(MINUTE, date_creation, date_resolution)) AS minutes_moyennes
       FROM incident

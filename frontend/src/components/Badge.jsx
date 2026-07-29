@@ -1,7 +1,7 @@
 const STYLES = {
-  interne: { bg: "#f4f4f4", color: "#4b0700" },
+  interne: { bg: "#e3e1d8", color: "#4b0700" },
   externe: { bg: "#fdece0", color: "#f77100" },
-  normale: { bg: "#f4f4f4", color: "#6b6a60" },
+  normale: { bg: "#e3e1d8", color: "#6b6a60" },
   haute: { bg: "#fdece0", color: "#c25400" },
   urgente: { bg: "#fbe4e4", color: "#b91c1c" },
   ouvert: { bg: "#fbe4e4", color: "#b91c1c" },

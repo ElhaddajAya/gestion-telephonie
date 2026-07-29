@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import Layout from "../../components/admin/Layout";
+import Badge from "../../components/Badge";
 import Pagination from "../../components/Pagination";
 import {
   BarChart,
@@ -453,7 +454,7 @@ function Dashboard({ user, onLogout }) {
                         "clamp(12px, 1vw, 18px) clamp(16px, 1.2vw, 22px)",
                     }}
                   >
-                    {inc.type}
+                    <Badge valeur={inc.type} />
                   </td>
                   <td
                     style={{
@@ -461,7 +462,7 @@ function Dashboard({ user, onLogout }) {
                         "clamp(12px, 1vw, 18px) clamp(16px, 1.2vw, 22px)",
                     }}
                   >
-                    {inc.priorite}
+                    <Badge valeur={inc.priorite} />
                   </td>
                   <td
                     style={{

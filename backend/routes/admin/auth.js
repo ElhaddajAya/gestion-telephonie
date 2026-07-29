@@ -59,6 +59,7 @@ router.post('/login', async (req, res) =>
                 nom: user.nom,
                 prenom: user.prenom,
                 role: user.role,
+                photo: user.photo,
                 doit_changer_mot_de_passe: !!user.doit_changer_mot_de_passe,
             },
         });
@@ -153,7 +154,7 @@ router.put('/profil', jwtMiddleware, async (req, res) =>
 
 // Stockage sur disque pour les photos de profil : contrairement a l'import Excel (traite en memoire
 // puis jete), une photo doit rester disponible pour etre reaffichee plus tard
-const dossierAvatars = path.join(__dirname, '..', 'uploads', 'avatars');
+const dossierAvatars = path.join(__dirname, '..', '..', 'uploads', 'avatars');
 fs.mkdirSync(dossierAvatars, { recursive: true });
 
 const TYPES_IMAGE_ACCEPTES = ['image/jpeg', 'image/png', 'image/webp'];
