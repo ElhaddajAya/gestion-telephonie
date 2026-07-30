@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../../services/apiPublic";
 import Badge from "../../components/Badge";
+import AgenceHeader from "../../components/agence/AgenceHeader";
 
 function AgenceAccueil() {
   const { code } = useParams();
@@ -53,18 +54,24 @@ function AgenceAccueil() {
     minWidth: "clamp(160px, 14vw, 220px)",
   };
 
-  // Meme padding que la zone de contenu de Layout.jsx (admin)
   const conteneurStyle = {
     minHeight: "100vh",
     background: "#f4f4f4",
     fontFamily: "'Montserrat', sans-serif",
+  };
+
+  // Meme padding que la zone de contenu de Layout.jsx (admin)
+  const contenuStyle = {
     padding: "clamp(28px, 3vw, 56px) clamp(32px, 4vw, 80px)",
   };
 
   if (chargement) {
     return (
       <div style={conteneurStyle}>
-        <p style={{ color: "#8a887e" }}>Chargement...</p>
+        <AgenceHeader />
+        <div style={contenuStyle}>
+          <p style={{ color: "#8a887e" }}>Chargement...</p>
+        </div>
       </div>
     );
   }
@@ -72,43 +79,21 @@ function AgenceAccueil() {
   if (erreur || !agence) {
     return (
       <div style={conteneurStyle}>
-        <p style={{ color: "#b91c1c" }}>
-          Agence introuvable. Vérifiez le lien utilisé ou contactez le siège.
-        </p>
+        <AgenceHeader />
+        <div style={contenuStyle}>
+          <p style={{ color: "#b91c1c" }}>
+            Agence introuvable. Vérifiez le lien utilisé ou contactez le siège.
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
     <div style={conteneurStyle}>
+      <AgenceHeader />
+      <div style={contenuStyle}>
       <div style={{ maxWidth: "1800px", margin: "0 auto" }}>
-        {/* En-tete : memes tailles que le logo BP / TELETRACK de l'espace admin */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "clamp(28px, 2.4vw, 48px)",
-          }}
-        >
-          <div
-            style={{
-              fontSize: "clamp(25px, 1.8vw, 32px)",
-              fontWeight: 700,
-              color: "#f77100",
-              letterSpacing: "0.01em",
-              fontFamily: "'Syncopate', sans-serif",
-            }}
-          >
-            TELETRACK
-          </div>
-          <img
-            src='/logo_bp.png'
-            alt='Banque Populaire'
-            style={{ height: "clamp(44px, 3.3vw, 58px)" }}
-          />
-        </div>
-
         {/* Identite de l'agence */}
         <div
           style={{
@@ -285,6 +270,7 @@ function AgenceAccueil() {
             ))}
           </div>
         )}
+      </div>
       </div>
     </div>
   );

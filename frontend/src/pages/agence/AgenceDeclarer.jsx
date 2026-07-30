@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { HiOutlineArrowLeft } from "react-icons/hi";
 import api from "../../services/apiPublic";
+import AgenceHeader from "../../components/agence/AgenceHeader";
 
 function AgenceDeclarer() {
   const { code } = useParams();
@@ -17,6 +18,9 @@ function AgenceDeclarer() {
     minHeight: "100vh",
     background: "#f4f4f4",
     fontFamily: "'Montserrat', sans-serif",
+  };
+
+  const contenuStyle = {
     padding: "clamp(28px, 3vw, 56px) clamp(32px, 4vw, 80px)",
   };
 
@@ -84,34 +88,9 @@ function AgenceDeclarer() {
 
   return (
     <div style={conteneurStyle}>
+      <AgenceHeader />
+      <div style={contenuStyle}>
       <div style={{ maxWidth: "1800px", margin: "0 auto" }}>
-        {/* En-tete */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "clamp(28px, 2.4vw, 48px)",
-          }}
-        >
-          <div
-            style={{
-              fontSize: "clamp(25px, 1.8vw, 32px)",
-              fontWeight: 700,
-              color: "#f77100",
-              letterSpacing: "0.01em",
-              fontFamily: "'Syncopate', sans-serif",
-            }}
-          >
-            TELETRACK
-          </div>
-          <img
-            src='/logo_bp.png'
-            alt='Banque Populaire'
-            style={{ height: "clamp(44px, 3.3vw, 58px)" }}
-          />
-        </div>
-
         <div
           onClick={() => navigate(`/agence/${code}`)}
           style={{
@@ -315,6 +294,7 @@ function AgenceDeclarer() {
             la page du ticket.
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
