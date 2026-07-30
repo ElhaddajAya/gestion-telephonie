@@ -138,6 +138,10 @@ function IncidentDetail({ user, onLogout }) {
       </Layout>
     );
 
+  // Seul l'admin assigne peut changer l'etat de ce ticket (pas d'exception superadmin :
+  // marquer un ticket comme resolu est une affirmation technique, pas une decision d'organisation)
+  const peutChangerEtat = incident.traite_par === user.id;
+
   return (
     <Layout
       user={user}
@@ -398,17 +402,20 @@ function IncidentDetail({ user, onLogout }) {
                   <b>
                     {incident.prenom_admin} {incident.nom_admin}
                   </b>
-                  <span
-                    onClick={() => setModalReassignerOuvert(true)}
-                    style={{
-                      color: "#f77100",
-                      fontWeight: 600,
-                      cursor: "pointer",
-                      fontSize: "12px",
-                    }}
-                  >
-                    ⇄ Réassigner
-                  </span>
+                  {/* Seul le superadmin ou l'admin actuellement assigne peut reassigner ce ticket */}
+                  {(user.role === "superadmin" || incident.traite_par === user.id) && (
+                    <span
+                      onClick={() => setModalReassignerOuvert(true)}
+                      style={{
+                        color: "#f77100",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                        fontSize: "12px",
+                      }}
+                    >
+                      ⇄ Réassigner
+                    </span>
+                  )}
                 </span>
               ) : (
                 <span
@@ -453,18 +460,27 @@ function IncidentDetail({ user, onLogout }) {
             <select
               value={incident.etat}
               onChange={(e) => changerEtat(e.target.value)}
+              disabled={!peutChangerEtat}
               style={{
                 width: "100%",
                 padding: "10px",
                 borderRadius: "6px",
                 border: "1px solid #d9d7cc",
                 fontSize: "13px",
+                background: peutChangerEtat ? "#fff" : "#f4f4f4",
+                color: peutChangerEtat ? "#2b2a26" : "#8a887e",
+                cursor: peutChangerEtat ? "pointer" : "not-allowed",
               }}
             >
               <option value='ouvert'>Ouvert</option>
               <option value='en_cours'>En cours</option>
               <option value='resolu'>Résolu</option>
             </select>
+            {!peutChangerEtat && (
+              <p style={{ fontSize: "12px", color: "#8a887e", margin: "6px 0 0" }}>
+                Assignez-vous ce ticket pour pouvoir changer son état.
+              </p>
+            )}
           </div>
         </div>
       </div>

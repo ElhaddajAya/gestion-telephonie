@@ -308,12 +308,34 @@ router.put('/:id/etat', verifyToken, async (req, res) =>
 
     try
     {
+        // Seul l'admin assigne peut changer l'etat de ce ticket (aucune exception pour le
+        // superadmin ici : contrairement a la reassignation, marquer un ticket "resolu" est une
+        // affirmation technique que seul l'admin qui le traite reellement peut faire — le
+        // superadmin doit d'abord se l'assigner s'il veut agir dessus).
+        const [incidentsActuels] = await db.query('SELECT traite_par FROM incident WHERE id = ?', [id]);
+        if (incidentsActuels.length === 0)
+        {
+            return res.status(404).json({ message: 'Incident introuvable.' });
+        }
+
+        if (incidentsActuels[0].traite_par !== req.user.id)
+        {
+            return res.status(403).json({ message: "Vous devez d'abord vous assigner ce ticket pour pouvoir changer son état." });
+        }
+
         // Si l'incident passe a "resolu", on enregistre aussi la date de resolution
         const dateResolution = etat === 'resolu' ? new Date() : null;
 
+        // Repasser a "ouvert" signifie relacher le ticket (plus personne dessus) : partout
+        // ailleurs dans l'appli, "ouvert" veut dire non-assigne (cloche, stats, auto-passage
+        // en_cours a l'assignation) — donc on vide traite_par pour rester coherent.
+        // (derniere_lecture n'a pas besoin d'etre touchee ici : elle sera de toute facon
+        // reinitialisee par PUT /:id/assigner quand un admin reprendra ce ticket)
+        const traiteParMisAJour = etat === 'ouvert' ? null : req.user.id;
+
         const [result] = await db.query(
-            `UPDATE incident SET etat = ?, date_resolution = ? WHERE id = ?`,
-            [etat, dateResolution, id]
+            `UPDATE incident SET etat = ?, date_resolution = ?, traite_par = ? WHERE id = ?`,
+            [etat, dateResolution, traiteParMisAJour, id]
         );
 
         if (result.affectedRows === 0)
@@ -341,6 +363,25 @@ router.put('/:id/assigner', verifyToken, async (req, res) =>
 
     try
     {
+        // Un admin ne peut reassigner que les tickets deja assignes a lui-meme (ou non assignes,
+        // cas du "s'assigner a moi"). Le superadmin, lui, peut reassigner n'importe quel ticket,
+        // pour pouvoir rééquilibrer la charge de travail entre admins.
+        const [incidentsActuels] = await db.query('SELECT traite_par FROM incident WHERE id = ?', [id]);
+        if (incidentsActuels.length === 0)
+        {
+            return res.status(404).json({ message: 'Incident introuvable.' });
+        }
+        const traiteParActuel = incidentsActuels[0].traite_par;
+
+        if (
+            req.user.role !== 'superadmin' &&
+            traiteParActuel !== null &&
+            traiteParActuel !== req.user.id
+        )
+        {
+            return res.status(403).json({ message: 'Vous ne pouvez réassigner que vos propres tickets.' });
+        }
+
         // Verifier que l'admin cible existe reellement (et recuperer son email pour la notification)
         const [admins] = await db.query('SELECT id, nom, prenom, email FROM utilisateur WHERE id = ?', [idAAssigner]);
         if (admins.length === 0)
