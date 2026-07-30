@@ -54,6 +54,7 @@ Toutes les requêtes utilisent des **requêtes paramétrées** (`?` + tableau de
 | **Import Excel limité en taille** | `routes/agences.js` | `multer` limité à 5 Mo (`limits: { fileSize: ... }`), pour éviter qu'un fichier énorme sature le serveur. |
 | **Import Excel limité en type** | `routes/agences.js` | Seuls les fichiers `.xlsx`/`.xls` (vérifiés via `mimetype`) sont acceptés, sinon `400` avec message clair. |
 | **Gestion d'erreur Multer** | `server.js` | Middleware d'erreur global (4 arguments `(err, req, res, next)`, reconnu automatiquement par Express) — renvoie une erreur JSON propre au lieu de la page HTML par défaut si le fichier dépasse la limite. |
+| **Limite sur les tentatives de connexion** | `routes/admin/auth.js` | `express-rate-limit` sur `POST /api/auth/login` : 5 tentatives par IP sur 15 minutes (les connexions réussies ne comptent pas), puis `429` avec message clair. Protège contre le brute-force sur les mots de passe admin. |
 
 ## 8. Points ouverts (pas des failles urgentes, à garder en tête)
 

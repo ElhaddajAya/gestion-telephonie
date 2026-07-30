@@ -4,12 +4,25 @@ const jwt = require('jsonwebtoken');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
+const rateLimit = require('express-rate-limit');
 const db = require('../../db');
 
 const router = express.Router();
 
+// Limite les tentatives de connexion (protection brute-force) : 5 essais par IP,
+// puis blocage de 15 minutes avant de pouvoir retenter. Les connexions reussies ne
+// comptent pas dans la limite (skipSuccessfulRequests), seuls les echecs s'accumulent.
+const limiteurLogin = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+    skipSuccessfulRequests: true,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { message: 'Trop de tentatives de connexion. Réessayez dans 15 minutes.' },
+});
+
 // POST /api/auth/login
-router.post('/login', async (req, res) =>
+router.post('/login', limiteurLogin, async (req, res) =>
 {
     const { matricule, mot_de_passe } = req.body;
 
