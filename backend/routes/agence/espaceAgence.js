@@ -145,9 +145,11 @@ router.get('/:code/tickets/:id', async (req, res) =>
     try
     {
         const [incidents] = await db.query(
-            `SELECT i.*, a.nom AS nom_agence, a.succursale
+            `SELECT i.*, a.nom AS nom_agence, a.succursale,
+              u.nom AS nom_admin, u.prenom AS prenom_admin
        FROM incident i
        JOIN agence a ON i.code_agence = a.code_agence
+       LEFT JOIN utilisateur u ON i.traite_par = u.id
        WHERE i.id = ? AND i.code_agence = ?`,
             [id, code]
         );

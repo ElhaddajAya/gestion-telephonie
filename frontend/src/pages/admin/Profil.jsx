@@ -3,7 +3,10 @@ import api from "../../services/api";
 import Layout from "../../components/admin/Layout";
 
 // Origine du backend (sans le "/api" final), pour construire l'URL de la photo de profil
-const origineApi = (import.meta.env.VITE_API_URL || "").replace(/\/api\/?$/, "");
+const origineApi = (import.meta.env.VITE_API_URL || "").replace(
+  /\/api\/?$/,
+  "",
+);
 
 function Profil({ user, onLogout, onUserUpdate }) {
   const inputPhotoRef = useRef(null);
@@ -60,7 +63,8 @@ function Profil({ user, onLogout, onUserUpdate }) {
     } catch (error) {
       setMessageInfos({
         type: "erreur",
-        texte: error.response?.data?.message || "Erreur lors de la mise à jour.",
+        texte:
+          error.response?.data?.message || "Erreur lors de la mise à jour.",
       });
     } finally {
       setEnregistrementInfos(false);
@@ -72,17 +76,25 @@ function Profil({ user, onLogout, onUserUpdate }) {
     setMessageMdp(null);
 
     if (nouveauMdp !== confirmationMdp) {
-      setMessageMdp({ type: "erreur", texte: "Les deux mots de passe ne correspondent pas." });
+      setMessageMdp({
+        type: "erreur",
+        texte: "Les deux mots de passe ne correspondent pas.",
+      });
       return;
     }
     if (nouveauMdp.length < 8) {
-      setMessageMdp({ type: "erreur", texte: "Le mot de passe doit contenir au moins 8 caractères." });
+      setMessageMdp({
+        type: "erreur",
+        texte: "Le mot de passe doit contenir au moins 8 caractères.",
+      });
       return;
     }
 
     setEnregistrementMdp(true);
     try {
-      await api.put("/auth/change-password", { nouveau_mot_de_passe: nouveauMdp });
+      await api.put("/auth/change-password", {
+        nouveau_mot_de_passe: nouveauMdp,
+      });
       setNouveauMdp("");
       setConfirmationMdp("");
       setMessageMdp({ type: "ok", texte: "Mot de passe changé avec succès." });
@@ -116,7 +128,9 @@ function Profil({ user, onLogout, onUserUpdate }) {
       console.error("Erreur upload photo :", error);
       setMessageInfos({
         type: "erreur",
-        texte: error.response?.data?.message || "Erreur lors de l'envoi de la photo.",
+        texte:
+          error.response?.data?.message ||
+          "Erreur lors de l'envoi de la photo.",
       });
     } finally {
       setEnvoiPhoto(false);
@@ -130,7 +144,7 @@ function Profil({ user, onLogout, onUserUpdate }) {
     padding: "clamp(20px, 1.6vw, 30px)",
     border: "1px solid #eee",
     boxShadow: "0 4px 10px rgba(43,42,38,0.06)",
-    marginBottom: "20px",
+    marginBottom: "10px",
     maxWidth: "640px",
   };
 
@@ -173,8 +187,11 @@ function Profil({ user, onLogout, onUserUpdate }) {
     fontFamily: "'Montserrat', sans-serif",
   });
 
-  const urlPhoto = profil?.photo ? `${origineApi}/uploads/avatars/${profil.photo}` : null;
-  const initiales = `${(prenom || "").charAt(0)}${(nom || "").charAt(0)}`.toUpperCase();
+  const urlPhoto = profil?.photo
+    ? `${origineApi}/uploads/avatars/${profil.photo}`
+    : null;
+  const initiales =
+    `${(prenom || "").charAt(0)}${(nom || "").charAt(0)}`.toUpperCase();
 
   return (
     <Layout
@@ -205,204 +222,257 @@ function Profil({ user, onLogout, onUserUpdate }) {
         <p style={{ color: "#8a887e" }}>Chargement...</p>
       ) : (
         <>
-          {/* Avatar */}
-          <div style={cardStyle}>
-            <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-              <div
-                style={{
-                  width: "clamp(70px, 5.5vw, 90px)",
-                  height: "clamp(70px, 5.5vw, 90px)",
-                  borderRadius: "50%",
-                  background: "#f77100",
-                  color: "#fff",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontWeight: 700,
-                  fontSize: "clamp(24px, 1.8vw, 32px)",
-                  flexShrink: 0,
-                  overflow: "hidden",
-                }}
-              >
-                {urlPhoto ? (
-                  <img
-                    src={urlPhoto}
-                    alt='Photo de profil'
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                  />
-                ) : (
-                  initiales
-                )}
+          <div
+            style={{
+              display: "flex",
+              gap: "20px",
+              flexWrap: "wrap",
+              alignItems: "flex-start",
+            }}
+          >
+            {/* Colonne gauche : avatar seul */}
+            <div
+              style={{
+                flex: 1,
+                minWidth: "300px",
+                maxWidth: "380px",
+              }}
+            >
+              {/* Avatar */}
+              <div style={cardStyle}>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "20px" }}
+                >
+                  <div
+                    style={{
+                      width: "clamp(70px, 5.5vw, 90px)",
+                      height: "clamp(70px, 5.5vw, 90px)",
+                      borderRadius: "50%",
+                      background: "#f77100",
+                      color: "#fff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontWeight: 700,
+                      fontSize: "clamp(24px, 1.8vw, 32px)",
+                      flexShrink: 0,
+                      overflow: "hidden",
+                    }}
+                  >
+                    {urlPhoto ? (
+                      <img
+                        src={urlPhoto}
+                        alt='Photo de profil'
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    ) : (
+                      initiales
+                    )}
+                  </div>
+                  <div>
+                    <button
+                      type='button'
+                      onClick={choisirPhoto}
+                      disabled={envoiPhoto}
+                      style={{
+                        padding: "10px 18px",
+                        background: "#fff",
+                        color: "#f77100",
+                        border: "1.5px solid #f77100",
+                        borderRadius: "6px",
+                        fontSize: "13px",
+                        fontWeight: 600,
+                        cursor: envoiPhoto ? "default" : "pointer",
+                        opacity: envoiPhoto ? 0.7 : 1,
+                        fontFamily: "'Montserrat', sans-serif",
+                      }}
+                    >
+                      {envoiPhoto ? "Envoi..." : "Changer la photo"}
+                    </button>
+                    <p
+                      style={{
+                        fontSize: "12px",
+                        color: "#8a887e",
+                        margin: "8px 0 0",
+                      }}
+                    >
+                      JPEG, PNG ou WEBP — 2 Mo maximum.
+                    </p>
+                    <input
+                      ref={inputPhotoRef}
+                      type='file'
+                      accept='image/jpeg,image/png,image/webp'
+                      onChange={envoyerPhoto}
+                      style={{ display: "none" }}
+                    />
+                  </div>
+                </div>
               </div>
-              <div>
-                <button
-                  type='button'
-                  onClick={choisirPhoto}
-                  disabled={envoiPhoto}
+            </div>
+
+            {/* Colonne droite : informations, puis mot de passe en dessous */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "20px",
+                flex: 2,
+                minWidth: "320px",
+              }}
+            >
+              <form
+                onSubmit={enregistrerInfos}
+                style={cardStyle}
+              >
+                <div
                   style={{
-                    padding: "10px 18px",
-                    background: "#fff",
-                    color: "#f77100",
-                    border: "1.5px solid #f77100",
-                    borderRadius: "6px",
-                    fontSize: "13px",
+                    fontSize: "12px",
+                    textTransform: "uppercase",
+                    color: "#8a887e",
                     fontWeight: 600,
-                    cursor: envoiPhoto ? "default" : "pointer",
-                    opacity: envoiPhoto ? 0.7 : 1,
-                    fontFamily: "'Montserrat', sans-serif",
                   }}
                 >
-                  {envoiPhoto ? "Envoi..." : "Changer la photo"}
-                </button>
-                <p style={{ fontSize: "12px", color: "#8a887e", margin: "8px 0 0" }}>
-                  JPEG, PNG ou WEBP — 2 Mo maximum.
-                </p>
+                  Informations
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "16px",
+                    flexWrap: "wrap",
+                    marginTop: "16px",
+                  }}
+                >
+                  <div style={{ flex: 1, minWidth: "160px" }}>
+                    <label style={{ ...labelStyle, marginTop: 0 }}>
+                      Matricule
+                    </label>
+                    <input
+                      value={profil?.matricule || ""}
+                      disabled
+                      style={inputLectureSeuleStyle}
+                    />
+                  </div>
+                  <div style={{ flex: 1, minWidth: "160px" }}>
+                    <label style={{ ...labelStyle, marginTop: 0 }}>Rôle</label>
+                    <input
+                      value={
+                        profil?.role === "superadmin" ? "Superadmin" : "Admin"
+                      }
+                      disabled
+                      style={inputLectureSeuleStyle}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
+                  <div style={{ flex: 1, minWidth: "160px" }}>
+                    <label style={labelStyle}>Prénom</label>
+                    <input
+                      value={prenom}
+                      onChange={(e) => setPrenom(e.target.value)}
+                      style={inputStyle}
+                    />
+                  </div>
+                  <div style={{ flex: 1, minWidth: "160px" }}>
+                    <label style={labelStyle}>Nom</label>
+                    <input
+                      value={nom}
+                      onChange={(e) => setNom(e.target.value)}
+                      style={inputStyle}
+                    />
+                  </div>
+                </div>
+
+                <label style={labelStyle}>Email</label>
                 <input
-                  ref={inputPhotoRef}
-                  type='file'
-                  accept='image/jpeg,image/png,image/webp'
-                  onChange={envoyerPhoto}
-                  style={{ display: "none" }}
+                  type='email'
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  style={inputStyle}
                 />
-              </div>
+
+                {messageInfos && (
+                  <p
+                    style={{
+                      color: messageInfos.type === "ok" ? "#1e7d34" : "#b91c1c",
+                      fontSize: "13px",
+                      marginTop: "12px",
+                    }}
+                  >
+                    {messageInfos.texte}
+                  </p>
+                )}
+
+                <button
+                  type='submit'
+                  disabled={enregistrementInfos}
+                  style={boutonStyle(enregistrementInfos)}
+                >
+                  {enregistrementInfos ? "Enregistrement..." : "Enregistrer"}
+                </button>
+              </form>
+
+              {/* Mot de passe */}
+              <form
+                onSubmit={changerMotDePasse}
+                style={cardStyle}
+              >
+                <div
+                  style={{
+                    fontSize: "12px",
+                    textTransform: "uppercase",
+                    color: "#8a887e",
+                    fontWeight: 600,
+                  }}
+                >
+                  Mot de passe
+                </div>
+
+                <label style={labelStyle}>Nouveau mot de passe</label>
+                <input
+                  type='password'
+                  value={nouveauMdp}
+                  onChange={(e) => setNouveauMdp(e.target.value)}
+                  style={inputStyle}
+                />
+
+                <label style={labelStyle}>Confirmer le mot de passe</label>
+                <input
+                  type='password'
+                  value={confirmationMdp}
+                  onChange={(e) => setConfirmationMdp(e.target.value)}
+                  style={inputStyle}
+                />
+
+                {messageMdp && (
+                  <p
+                    style={{
+                      color: messageMdp.type === "ok" ? "#1e7d34" : "#b91c1c",
+                      fontSize: "13px",
+                      marginTop: "12px",
+                    }}
+                  >
+                    {messageMdp.texte}
+                  </p>
+                )}
+
+                <button
+                  type='submit'
+                  disabled={enregistrementMdp}
+                  style={boutonStyle(enregistrementMdp)}
+                >
+                  {enregistrementMdp
+                    ? "Enregistrement..."
+                    : "Changer le mot de passe"}
+                </button>
+              </form>
             </div>
           </div>
-
-          {/* Informations */}
-          <form
-            onSubmit={enregistrerInfos}
-            style={cardStyle}
-          >
-            <div
-              style={{
-                fontSize: "12px",
-                textTransform: "uppercase",
-                color: "#8a887e",
-                fontWeight: 600,
-              }}
-            >
-              Informations
-            </div>
-
-            <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", marginTop: "16px" }}>
-              <div style={{ flex: 1, minWidth: "160px" }}>
-                <label style={{ ...labelStyle, marginTop: 0 }}>Matricule</label>
-                <input
-                  value={profil?.matricule || ""}
-                  disabled
-                  style={inputLectureSeuleStyle}
-                />
-              </div>
-              <div style={{ flex: 1, minWidth: "160px" }}>
-                <label style={{ ...labelStyle, marginTop: 0 }}>Rôle</label>
-                <input
-                  value={profil?.role === "superadmin" ? "Superadmin" : "Admin"}
-                  disabled
-                  style={inputLectureSeuleStyle}
-                />
-              </div>
-            </div>
-
-            <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
-              <div style={{ flex: 1, minWidth: "160px" }}>
-                <label style={labelStyle}>Prénom</label>
-                <input
-                  value={prenom}
-                  onChange={(e) => setPrenom(e.target.value)}
-                  style={inputStyle}
-                />
-              </div>
-              <div style={{ flex: 1, minWidth: "160px" }}>
-                <label style={labelStyle}>Nom</label>
-                <input
-                  value={nom}
-                  onChange={(e) => setNom(e.target.value)}
-                  style={inputStyle}
-                />
-              </div>
-            </div>
-
-            <label style={labelStyle}>Email</label>
-            <input
-              type='email'
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={inputStyle}
-            />
-
-            {messageInfos && (
-              <p
-                style={{
-                  color: messageInfos.type === "ok" ? "#1e7d34" : "#b91c1c",
-                  fontSize: "13px",
-                  marginTop: "12px",
-                }}
-              >
-                {messageInfos.texte}
-              </p>
-            )}
-
-            <button
-              type='submit'
-              disabled={enregistrementInfos}
-              style={boutonStyle(enregistrementInfos)}
-            >
-              {enregistrementInfos ? "Enregistrement..." : "Enregistrer"}
-            </button>
-          </form>
-
-          {/* Mot de passe */}
-          <form
-            onSubmit={changerMotDePasse}
-            style={cardStyle}
-          >
-            <div
-              style={{
-                fontSize: "12px",
-                textTransform: "uppercase",
-                color: "#8a887e",
-                fontWeight: 600,
-              }}
-            >
-              Mot de passe
-            </div>
-
-            <label style={labelStyle}>Nouveau mot de passe</label>
-            <input
-              type='password'
-              value={nouveauMdp}
-              onChange={(e) => setNouveauMdp(e.target.value)}
-              style={inputStyle}
-            />
-
-            <label style={labelStyle}>Confirmer le mot de passe</label>
-            <input
-              type='password'
-              value={confirmationMdp}
-              onChange={(e) => setConfirmationMdp(e.target.value)}
-              style={inputStyle}
-            />
-
-            {messageMdp && (
-              <p
-                style={{
-                  color: messageMdp.type === "ok" ? "#1e7d34" : "#b91c1c",
-                  fontSize: "13px",
-                  marginTop: "12px",
-                }}
-              >
-                {messageMdp.texte}
-              </p>
-            )}
-
-            <button
-              type='submit'
-              disabled={enregistrementMdp}
-              style={boutonStyle(enregistrementMdp)}
-            >
-              {enregistrementMdp ? "Enregistrement..." : "Changer le mot de passe"}
-            </button>
-          </form>
         </>
       )}
     </Layout>

@@ -170,10 +170,18 @@ function AgenceTicketDetail() {
             marginBottom: "22px",
           }}
         >
-          <div style={{ display: "flex", gap: "8px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
             <Badge valeur={incident.type} />
             <Badge valeur={incident.priorite} />
             <Badge valeur={incident.etat} />
+            {incident.nom_admin && (
+              <span style={{ fontSize: "13px", color: "#8a887e" }}>
+                Pris en charge par{" "}
+                <b style={{ color: "#2b2a26" }}>
+                  {incident.prenom_admin} {incident.nom_admin}
+                </b>
+              </span>
+            )}
           </div>
           {incident.etat === "resolu" ? (
             <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
