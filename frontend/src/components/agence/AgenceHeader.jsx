@@ -3,7 +3,15 @@
 // (limite a 1800px) laisse beaucoup de vide gris autour.
 function AgenceHeader() {
   return (
-    <div style={{ background: "#fff", borderBottom: "1px solid #eee" }}>
+    <div
+      style={{
+        position: "sticky",
+        top: 0,
+        zIndex: 30,
+        background: "#fff",
+        borderBottom: "1px solid #eee",
+      }}
+    >
       <div
         style={{
           maxWidth: "1800px",
