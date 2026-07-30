@@ -88,12 +88,6 @@ router.get('/stats-detaillees', verifyToken, async (req, res) =>
       WHERE etat = 'resolu' AND date_resolution IS NOT NULL
     `);
 
-        // Incidents non assignes (personne dessus), hors incidents deja resolus
-        const [[nonAssignes]] = await db.query(`
-      SELECT COUNT(*) AS total FROM incident
-      WHERE traite_par IS NULL AND etat != 'resolu'
-    `);
-
         // Repartition par type
         const [parType] = await db.query(`
       SELECT type, COUNT(*) AS total FROM incident GROUP BY type
@@ -110,7 +104,6 @@ router.get('/stats-detaillees', verifyToken, async (req, res) =>
 
         res.json({
             temps_resolution_minutes: tempsResolution.minutes_moyennes,
-            incidents_non_assignes: nonAssignes.total,
             par_type: parType,
             par_succursale: parSuccursale,
         });

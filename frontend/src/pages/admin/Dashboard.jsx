@@ -184,58 +184,28 @@ function Dashboard({ user, onLogout }) {
             Résolus ce mois
           </div>
         </div>
+        {statsAvancees && (
+          <div style={cardStyle}>
+            <div
+              style={{
+                fontSize: "clamp(24px, 1.8vw, 36px)",
+                fontWeight: 700,
+                color: "#f77100",
+              }}
+            >
+              {formaterDuree(statsAvancees.temps_resolution_minutes)}
+            </div>
+            <div
+              style={{ fontSize: "clamp(12px, 0.85vw, 15px)", color: "#8a887e" }}
+            >
+              Temps moyen de résolution
+            </div>
+          </div>
+        )}
       </div>
 
       {statsAvancees && (
         <>
-          <div
-            style={{
-              display: "flex",
-              gap: "clamp(16px, 1.2vw, 24px)",
-              flexWrap: "wrap",
-              margin: "30px 0 26px",
-            }}
-          >
-            <div style={cardStyle}>
-              <div
-                style={{
-                  fontSize: "clamp(24px, 1.8vw, 36px)",
-                  fontWeight: 700,
-                  color: "#f77100",
-                }}
-              >
-                {formaterDuree(statsAvancees.temps_resolution_minutes)}
-              </div>
-              <div
-                style={{
-                  fontSize: "clamp(12px, 0.85vw, 15px)",
-                  color: "#8a887e",
-                }}
-              >
-                Temps moyen de résolution
-              </div>
-            </div>
-            <div style={cardStyle}>
-              <div
-                style={{
-                  fontSize: "clamp(24px, 1.8vw, 36px)",
-                  fontWeight: 700,
-                  color: "#b91c1c",
-                }}
-              >
-                {statsAvancees.incidents_non_assignes}
-              </div>
-              <div
-                style={{
-                  fontSize: "clamp(12px, 0.85vw, 15px)",
-                  color: "#8a887e",
-                }}
-              >
-                Incidents non assignés
-              </div>
-            </div>
-          </div>
-
           <div
             style={{
               display: "grid",
