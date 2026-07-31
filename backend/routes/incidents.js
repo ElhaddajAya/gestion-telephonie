@@ -131,16 +131,21 @@ router.get('/', verifyToken, async (req, res) =>
     try
     {
         // On construit la requete dynamiquement selon les filtres presents
-        // "nouveau" : un message d'agence existe et n'a pas encore ete lu par l'admin assigne
-        // (meme condition que la cloche /commentaires-recents, mais calculee par ticket)
+        // "nouveau" : soit un message d'agence existe et n'a pas encore ete lu par l'admin assigne
+        // (meme condition que la cloche /commentaires-recents), soit le ticket vient d'etre
+        // (re)assigne et l'admin ne l'a pas encore ouvert depuis (derniere_lecture remise a NULL
+        // par PUT /:id/assigner) — ce deuxieme cas couvre l'assignation/reassignation sans message.
         let sql = `
       SELECT i.*, a.nom AS nom_agence, a.succursale,
              u.nom AS nom_admin, u.prenom AS prenom_admin,
-             EXISTS (
-               SELECT 1 FROM commentaire c
-               WHERE c.incident_id = i.id
-                 AND c.auteur_agence_code IS NOT NULL
-                 AND (i.derniere_lecture IS NULL OR c.date_creation > i.derniere_lecture)
+             (
+               EXISTS (
+                 SELECT 1 FROM commentaire c
+                 WHERE c.incident_id = i.id
+                   AND c.auteur_agence_code IS NOT NULL
+                   AND (i.derniere_lecture IS NULL OR c.date_creation > i.derniere_lecture)
+               )
+               OR (i.traite_par IS NOT NULL AND i.derniere_lecture IS NULL)
              ) AS nouveau
       FROM incident i
       JOIN agence a ON i.code_agence = a.code_agence
