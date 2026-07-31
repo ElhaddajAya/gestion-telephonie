@@ -15,7 +15,7 @@ Une agence déclare un incident téléphonique (ligne coupée, standard inaccess
 | **Frontend**         | React (Vite), react-router-dom, axios, recharts, react-icons      |
 | **Backend**          | Node.js / Express                                                 |
 | **Base de données**  | MySQL                                                             |
-| **Authentification** | JWT (admin/superadmin uniquement) + mots de passe hachés (bcrypt) |
+| **Authentification** | JWT (admin/superadmin uniquement) + mots de passe hachés (bcrypt) + `express-rate-limit` (anti brute-force sur le login) |
 | **Autres**           | ExcelJS + xlsx + multer (import/export Excel des agences)         |
 
 ## Rôles
@@ -62,11 +62,11 @@ gestion-telephonie/
 
 - **Espace agence** (`/agence/:code`, public, sans compte) : page d'accueil (identité, aperçu chiffré, tickets récents), liste complète "Mes tickets" avec filtres (état, type, priorité) et tri par date de déclaration, détail d'un ticket avec fil de discussion (l'agence peut répondre), et formulaire de déclaration (`/agence/:code/declarer`) — le tout scopé à sa propre agence. L'agence peut aussi marquer un ticket comme résolu ou le rouvrir (le passage à "en cours" reste réservé à l'admin).
 - **Déclaration d'incident** par l'agence (titre, type interne/externe, priorité, description) — redirige vers la page de suivi du ticket une fois créé.
-- **Tableau de bord** : statistiques (tickets ouverts, en cours, urgents, résolus), répartition par type/succursale, temps moyen de résolution.
+- **Tableau de bord** : statistiques réseau (tickets ouverts non assignés, priorité urgente, temps moyen de résolution) séparées visuellement des statistiques personnalisées à l'admin connecté (ses tickets en cours, ses tickets résolus ce mois), répartition par type/succursale.
 - **Liste des tickets** (tous / "Mes tickets") avec recherche, filtres (état, type, priorité, date) et tri.
-- **Détail d'un ticket** : fil de discussion en bulles de chat (admin ↔ agence), rafraîchi automatiquement, informations agence modifiables, changement d'état, assignation/réassignation.
+- **Détail d'un ticket** : fil de discussion en bulles de chat (admin ↔ agence), rafraîchi automatiquement, informations agence modifiables, changement d'état, assignation/réassignation — chacune réservée à l'admin en charge du ticket (le superadmin peut réassigner n'importe quel ticket pour rééquilibrer la charge, mais ne peut pas changer l'état d'un ticket qui n'est pas le sien : c'est une affirmation technique, pas une décision d'organisation). Repasser un ticket à "ouvert" vide automatiquement son admin assigné.
 - **Notifications** : cloche avec badge pour les nouveaux tickets et les nouvelles réponses sur les tickets assignés à l'admin connecté (statut lu/non-lu suivi en base, pas de compte requis pour l'agence). Un point rouge signale aussi les tickets avec du nouveau, ligne par ligne : sur "Mes tickets" côté admin, et sur la liste/l'accueil côté agence (réponse d'admin ou assignation depuis sa dernière visite) — sans email pour l'instant (voir `docs/notifications-messages.md`).
-- **Gestion des agences** : liste, export Excel, import/mise à jour en masse via fichier Excel.
+- **Gestion des agences** : liste, export Excel (regroupé par succursale, colonne fusionnée en premier), import/mise à jour en masse via fichier Excel.
 - **Mon profil** (`/profil`) : consultation et modification de son nom/prénom/email, changement de mot de passe, upload d'une photo de profil (JPEG/PNG/WEBP, 2 Mo max).
 - **Distinction admin / superadmin** : badge "Superadmin" affiché dans l'en-tête et lien "Comptes admin" visible uniquement pour les superadmins.
 - **Gestion des comptes admin** (superadmin uniquement, `/comptes-admin`) : création (rôle admin ou superadmin, mot de passe temporaire généré automatiquement), modification, réinitialisation de mot de passe, activation/désactivation (jamais de suppression définitive, pour garder l'historique des tickets traités par ce compte).
