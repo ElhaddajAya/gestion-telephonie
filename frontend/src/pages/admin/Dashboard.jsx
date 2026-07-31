@@ -112,6 +112,17 @@ function Dashboard({ user, onLogout }) {
         Vue d'ensemble et nouveaux tickets
       </p>
 
+      <h3
+        style={{
+          fontSize: "clamp(13px, 0.9vw, 16px)",
+          textTransform: "uppercase",
+          color: "#8a887e",
+          marginBottom: "14px",
+          fontWeight: 600,
+        }}
+      >
+        Réseau
+      </h3>
       <div
         style={{
           display: "flex",
@@ -133,23 +144,7 @@ function Dashboard({ user, onLogout }) {
           <div
             style={{ fontSize: "clamp(12px, 0.85vw, 15px)", color: "#8a887e" }}
           >
-            Tickets ouverts
-          </div>
-        </div>
-        <div style={cardStyle}>
-          <div
-            style={{
-              fontSize: "clamp(24px, 1.8vw, 36px)",
-              fontWeight: 700,
-              color: "#f77100",
-            }}
-          >
-            {stats.en_cours}
-          </div>
-          <div
-            style={{ fontSize: "clamp(12px, 0.85vw, 15px)", color: "#8a887e" }}
-          >
-            En cours de traitement
+            Tickets ouverts (non assignés)
           </div>
         </div>
         <div style={cardStyle}>
@@ -166,22 +161,6 @@ function Dashboard({ user, onLogout }) {
             style={{ fontSize: "clamp(12px, 0.85vw, 15px)", color: "#8a887e" }}
           >
             Priorité urgente
-          </div>
-        </div>
-        <div style={cardStyle}>
-          <div
-            style={{
-              fontSize: "clamp(24px, 1.8vw, 36px)",
-              fontWeight: 700,
-              color: "#f77100",
-            }}
-          >
-            {stats.resolus_ce_mois}
-          </div>
-          <div
-            style={{ fontSize: "clamp(12px, 0.85vw, 15px)", color: "#8a887e" }}
-          >
-            Résolus ce mois
           </div>
         </div>
         {statsAvancees && (
@@ -202,6 +181,59 @@ function Dashboard({ user, onLogout }) {
             </div>
           </div>
         )}
+      </div>
+
+      <h3
+        style={{
+          fontSize: "clamp(13px, 0.9vw, 16px)",
+          textTransform: "uppercase",
+          color: "#8a887e",
+          marginBottom: "14px",
+          fontWeight: 600,
+        }}
+      >
+        Vos tickets
+      </h3>
+      <div
+        style={{
+          display: "flex",
+          gap: "clamp(16px, 1.2vw, 24px)",
+          flexWrap: "wrap",
+          marginBottom: "26px",
+        }}
+      >
+        <div style={cardStyle}>
+          <div
+            style={{
+              fontSize: "clamp(24px, 1.8vw, 36px)",
+              fontWeight: 700,
+              color: "#4b0700",
+            }}
+          >
+            {stats.mes_tickets_en_cours}
+          </div>
+          <div
+            style={{ fontSize: "clamp(12px, 0.85vw, 15px)", color: "#8a887e" }}
+          >
+            En cours de traitement par vous
+          </div>
+        </div>
+        <div style={cardStyle}>
+          <div
+            style={{
+              fontSize: "clamp(24px, 1.8vw, 36px)",
+              fontWeight: 700,
+              color: "#4b0700",
+            }}
+          >
+            {stats.mes_tickets_resolus_ce_mois}
+          </div>
+          <div
+            style={{ fontSize: "clamp(12px, 0.85vw, 15px)", color: "#8a887e" }}
+          >
+            Résolus par vous ce mois
+          </div>
+        </div>
       </div>
 
       {statsAvancees && (

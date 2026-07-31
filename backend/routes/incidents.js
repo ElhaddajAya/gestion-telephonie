@@ -52,21 +52,29 @@ router.get('/stats', verifyToken, async (req, res) =>
 {
     try
     {
+        // Stats globales (sante du reseau, pas propres a un admin en particulier)
         const [[ouverts]] = await db.query(`SELECT COUNT(*) AS total FROM incident WHERE etat = 'ouvert'`);
-        const [[enCours]] = await db.query(`SELECT COUNT(*) AS total FROM incident WHERE etat = 'en_cours'`);
         const [[urgents]] = await db.query(`SELECT COUNT(*) AS total FROM incident WHERE priorite = 'urgente' AND etat != 'resolu'`);
-        const [[resolusCeMois]] = await db.query(`
-      SELECT COUNT(*) AS total FROM incident
-      WHERE etat = 'resolu'
-        AND MONTH(date_resolution) = MONTH(CURRENT_DATE())
-        AND YEAR(date_resolution) = YEAR(CURRENT_DATE())
-    `);
+
+        // Stats personnalisees (propres a l'admin connecte, plus actionnables au quotidien
+        // qu'un chiffre global sur tout le reseau)
+        const [[mesEnCours]] = await db.query(
+            `SELECT COUNT(*) AS total FROM incident WHERE etat = 'en_cours' AND traite_par = ?`,
+            [req.user.id]
+        );
+        const [[mesResolusCeMois]] = await db.query(
+            `SELECT COUNT(*) AS total FROM incident
+       WHERE etat = 'resolu' AND traite_par = ?
+         AND MONTH(date_resolution) = MONTH(CURRENT_DATE())
+         AND YEAR(date_resolution) = YEAR(CURRENT_DATE())`,
+            [req.user.id]
+        );
 
         res.json({
             incidents_ouverts: ouverts.total,
-            en_cours: enCours.total,
             priorite_urgente: urgents.total,
-            resolus_ce_mois: resolusCeMois.total,
+            mes_tickets_en_cours: mesEnCours.total,
+            mes_tickets_resolus_ce_mois: mesResolusCeMois.total,
         });
     } catch (error)
     {
