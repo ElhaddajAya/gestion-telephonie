@@ -109,7 +109,6 @@ function MesTickets({ user, onLogout }) {
           style={inputStyle}
         >
           <option value=''>Tous les états</option>
-          <option value='ouvert'>Ouvert</option>
           <option value='en_cours'>En cours</option>
           <option value='resolu'>Résolu</option>
         </select>
