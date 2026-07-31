@@ -113,9 +113,9 @@ router.get('/export', verifyToken, async (req, res) =>
         const sheet = workbook.addWorksheet('Agences');
 
         sheet.columns = [
+            { header: 'Succursale', key: 'succursale', width: 22 },
             { header: 'Code agence', key: 'code_agence', width: 14 },
             { header: 'Nom', key: 'nom', width: 28 },
-            { header: 'Succursale', key: 'succursale', width: 22 },
             { header: 'Adresse', key: 'adresse', width: 30 },
             { header: 'Téléphone fixe', key: 'telephone', width: 16 },
             { header: 'Email', key: 'email', width: 30 },
@@ -127,7 +127,7 @@ router.get('/export', verifyToken, async (req, res) =>
 
         agences.forEach((a) => sheet.addRow(a));
 
-        // Fusionne la colonne "Succursale" (3eme colonne) pour les lignes consecutives d'une meme succursale
+        // Fusionne la colonne "Succursale" (1ere colonne) pour les lignes consecutives d'une meme succursale
         // La ligne 1 est l'en-tete, les donnees commencent donc a la ligne 2
         let debutGroupe = 2;
         agences.forEach((a, index) =>
@@ -140,8 +140,8 @@ router.get('/export', verifyToken, async (req, res) =>
             {
                 if (ligneActuelle > debutGroupe)
                 {
-                    sheet.mergeCells(debutGroupe, 3, ligneActuelle, 3);
-                    sheet.getCell(debutGroupe, 3).alignment = { vertical: 'middle' };
+                    sheet.mergeCells(debutGroupe, 1, ligneActuelle, 1);
+                    sheet.getCell(debutGroupe, 1).alignment = { vertical: 'middle' };
                 }
                 debutGroupe = ligneActuelle + 1;
             }
