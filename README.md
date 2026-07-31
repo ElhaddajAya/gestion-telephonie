@@ -185,7 +185,9 @@ Liste des 216 agences, avec recherche, filtres (succursale, plateforme télépho
 
 ![Liste des agences](screenshots/agences.png)
 
-Un lien **"Historique"** sur chaque ligne mène à une page dédiée à l'agence : nombre total d'incidents, répartition par état (ouverts/en cours/résolus), temps moyen de résolution de cette agence comparé à la moyenne du réseau, et la liste complète de ses tickets. Utile pour repérer une agence qui a des problèmes récurrents, sans avoir à filtrer manuellement "Tous les tickets".
+Un lien **"Historique"** sur chaque ligne mène à une page dédiée à l'agence : nombre total d'incidents, répartition par état (ouverts/en cours/résolus), temps moyen de résolution de cette agence à côté de la moyenne du réseau (deux chiffres simples, sans calcul à interpréter), et la liste complète de ses tickets (triable par date de déclaration). Utile pour repérer une agence qui a des problèmes récurrents, sans avoir à filtrer manuellement "Tous les tickets".
+
+![Historique des incidents d'une agence](screenshots/agence-historique.png)
 
 ### 3.6. Mon profil
 
