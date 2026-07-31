@@ -53,6 +53,8 @@ ADD COLUMN derniere_lecture_agence DATETIME NULL;
 
 **Pourquoi pas un email à chaque message ?** Pour éviter de solliciter le SMTP à chaque échange du fil de discussion (et d'inonder l'agence de mails), l'email (une fois le SMTP débloqué) est réservé aux événements marquants comme l'assignation — pas aux messages un par un, qui restent couverts uniquement par ce badge in-app, sans coût d'envoi.
 
+**L'email d'assignation est déjà prêt, en attente du SMTP.** `PUT /incidents/:id/assigner` appelle déjà `envoyerMail()` deux fois (no-op tant que `backend/.env` n'a pas de vrais identifiants SMTP) : une fois pour l'admin désormais en charge (`admin.email`, jamais l'admin qui a cliqué), une fois pour l'agence (`agence.email`, déjà en base). Le jour où le SMTP est fourni, il suffit de remplir les variables `SMTP_*` dans `backend/.env` — aucun code à changer.
+
 ## Le même point rouge côté admin ("Mes tickets")
 
 Même logique, mais l'info existe déjà : `derniere_lecture` (lu/non lu par l'admin assigné) et les commentaires d'agence sont déjà en base, donc pas de nouvelle colonne nécessaire.
@@ -60,14 +62,17 @@ Même logique, mais l'info existe déjà : `derniere_lecture` (lu/non lu par l'a
 `GET /api/incidents` (utilisée par `MesTickets.jsx`) calcule un champ `nouveau` par ticket :
 
 ```sql
-EXISTS (
-  SELECT 1 FROM commentaire c
-  WHERE c.incident_id = i.id
-    AND c.auteur_agence_code IS NOT NULL
-    AND (i.derniere_lecture IS NULL OR c.date_creation > i.derniere_lecture)
+(
+  EXISTS (
+    SELECT 1 FROM commentaire c
+    WHERE c.incident_id = i.id
+      AND c.auteur_agence_code IS NOT NULL
+      AND (i.derniere_lecture IS NULL OR c.date_creation > i.derniere_lecture)
+  )
+  OR (i.traite_par IS NOT NULL AND i.derniere_lecture IS NULL)
 ) AS nouveau
 ```
 
-C'est exactement la même condition que `/commentaires-recents` (la cloche), juste calculée ticket par ticket plutôt qu'en liste globale.
+Le premier `EXISTS` est la même condition que `/commentaires-recents` (la cloche), juste calculée ticket par ticket plutôt qu'en liste globale. Le second `OR` a été ajouté après coup : sans lui, un ticket tout juste (ré)assigné mais sans encore aucun message d'agence n'affichait rien du tout — l'admin n'avait aucun moyen de savoir qu'on venait de lui confier un ticket. Comme `derniere_lecture` est déjà remise à `NULL` à chaque assignation, "jamais rouvert depuis" (`derniere_lecture IS NULL`) suffit à lui seul à détecter ce cas, sans nouvelle colonne.
 
 **Uniquement sur "Mes tickets", pas sur "Tous les tickets"** : sur "Mes tickets", chaque ligne appartient à l'admin connecté, donc `derniere_lecture` le concerne directement. Sur "Tous les tickets", certaines lignes appartiennent à d'autres admins — afficher un point basé sur leur lecture à eux serait trompeur pour la personne qui regarde l'écran.

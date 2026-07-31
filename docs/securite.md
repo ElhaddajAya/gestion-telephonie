@@ -27,6 +27,8 @@ Résumé de tous les aspects de sécurité mis en place dans le code, et de ce q
 - Un admin **ne peut commenter que s'il est l'admin assigné** au ticket (`traite_par === decoded.id`, sinon `403`) — il doit d'abord se l'assigner.
 - `PUT /:id/lu` (marquer comme lu) ne met à jour que si l'appelant est bien `traite_par` de ce ticket.
 - `PUT /:id/assigner` réinitialise `derniere_lecture` à chaque réassignation, pour que le nouvel admin ne rate pas les anciens messages.
+- **Réassignation restreinte** : un admin ne peut réassigner que les tickets déjà assignés à lui-même (ou encore libres) — `403` sinon. Le superadmin fait exception : il peut réassigner n'importe quel ticket, pour rééquilibrer la charge de travail entre admins.
+- **Changement d'état restreint, sans exception cette fois** : seul l'admin actuellement en charge du ticket (`traite_par === decoded.id`) peut changer son état — `403` sinon, y compris pour le superadmin. Marquer un ticket "résolu" est une affirmation technique sur l'avancement réel du problème, pas une décision d'organisation ; le superadmin doit d'abord se l'assigner s'il veut agir dessus. Si le nouvel état est "ouvert", `traite_par` est remis à `NULL` (le ticket redevient réellement non assigné).
 - **Gestion des comptes admin, réservée au superadmin** (`backend/routes/utilisateurs.js`, middleware `verifierSuperadmin` : rejette avec `403` si `req.user.role !== 'superadmin'`) : création (`POST /`), modification (`PUT /:id`), activation/désactivation (`PUT /:id/statut`), réinitialisation de mot de passe (`PUT /:id/reinitialiser-mot-de-passe`). La liste (`GET /`) reste accessible à tous les admins (nécessaire pour la réassignation de tickets).
   - Un superadmin ne peut ni désactiver, ni changer le rôle de **son propre compte** (évite un verrouillage accidentel).
   - Impossible de désactiver le **dernier superadmin actif** restant.
@@ -59,5 +61,4 @@ Toutes les requêtes utilisent des **requêtes paramétrées** (`?` + tableau de
 ## 8. Points ouverts (pas des failles urgentes, à garder en tête)
 
 - **Colonne `utilisateur.code_agence`** : legacy, plus utilisée depuis que les agences n'ont plus de compte — à supprimer proprement (`DROP FOREIGN KEY` puis `DROP COLUMN`).
-- **Pas de limite sur les tentatives de connexion** (`POST /api/auth/login`) : rien n'empêche un enchaînement de tentatives de mot de passe sur un compte admin (brute-force). Même en réseau interne, c'est le genre de contrôle attendu dans un contexte bancaire — une librairie comme `express-rate-limit` (bloquer après X échecs) réglerait ça simplement.
 - **HTTPS** : rien dans le code ne gère le chiffrement du trafic. Comme l'appli tourne en réseau interne, c'est probablement à gérer par un reverse proxy côté infra plutôt que dans le code — à vérifier avec M. Sebbar que ce n'est pas oublié.
