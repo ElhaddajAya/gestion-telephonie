@@ -413,14 +413,31 @@ router.put('/:id/assigner', verifyToken, async (req, res) =>
             return res.status(404).json({ message: 'Incident introuvable.' });
         }
 
-        // Notification par email a l'admin assigne (ne fait rien tant que le SMTP n'est pas configure)
+        // Notifications par email (ne font rien tant que le SMTP n'est pas configure, voir mailer.js) :
+        // a l'admin desormais en charge, et a l'agence pour la rassurer que quelqu'un s'en occupe.
+        const [[incidentInfo]] = await db.query(
+            `SELECT i.titre, i.code_agence, a.email AS email_agence, a.nom AS nom_agence
+       FROM incident i
+       JOIN agence a ON i.code_agence = a.code_agence
+       WHERE i.id = ?`,
+            [id]
+        );
+
         if (admin.email)
         {
-            const [[incidentInfo]] = await db.query('SELECT titre FROM incident WHERE id = ?', [id]);
             await envoyerMail(
                 admin.email,
                 `TeleTrack - Ticket #${id} vous a été assigné`,
                 `Bonjour ${admin.prenom || ''} ${admin.nom},\n\nLe ticket #${id} (${incidentInfo?.titre || 'sans titre'}) vous a été assigné.\nConnectez-vous à TeleTrack pour le consulter.`
+            );
+        }
+
+        if (incidentInfo?.email_agence)
+        {
+            await envoyerMail(
+                incidentInfo.email_agence,
+                `TeleTrack - Votre ticket #${id} est pris en charge`,
+                `Bonjour,\n\nVotre ticket #${id} (${incidentInfo.titre || 'sans titre'}) est désormais pris en charge par ${admin.prenom || ''} ${admin.nom}.\nVous pouvez suivre son évolution et échanger avec l'admin directement depuis la page de votre ticket.`
             );
         }
 
