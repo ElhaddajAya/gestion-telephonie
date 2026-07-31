@@ -13,6 +13,7 @@ import Incidents from "./pages/admin/Incidents";
 import MesTickets from "./pages/admin/MesTickets";
 import IncidentDetail from "./pages/admin/IncidentDetail";
 import Agences from "./pages/admin/Agences";
+import AgenceHistorique from "./pages/admin/AgenceHistorique";
 import Profil from "./pages/admin/Profil";
 import ComptesAdmin from "./pages/admin/ComptesAdmin";
 import AgenceAccueil from "./pages/agence/AgenceAccueil";
@@ -207,6 +208,22 @@ function AppRoutes() {
             />
           ) : (
             <Agences
+              user={user}
+              onLogout={handleLogout}
+            />
+          )
+        }
+      />
+      <Route
+        path='/agences/:code/historique'
+        element={
+          !user ? (
+            <Navigate
+              to='/login'
+              replace
+            />
+          ) : (
+            <AgenceHistorique
               user={user}
               onLogout={handleLogout}
             />

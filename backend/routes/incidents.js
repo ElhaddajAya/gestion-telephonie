@@ -126,7 +126,7 @@ router.get('/stats-detaillees', verifyToken, async (req, res) =>
 // Filtres optionnels via l'URL : ?etat=ouvert&type=externe&priorite=urgente&date=2026-07-24&tri=asc&assigne=moi
 router.get('/', verifyToken, async (req, res) =>
 {
-    const { etat, type, priorite, agence, date, tri, assigne } = req.query;
+    const { etat, type, priorite, agence, code_agence, date, tri, assigne } = req.query;
 
     try
     {
@@ -173,6 +173,13 @@ router.get('/', verifyToken, async (req, res) =>
         {
             sql += ' AND (a.nom LIKE ? OR i.code_agence LIKE ? OR i.titre LIKE ?)';
             params.push(`%${agence}%`, `%${agence}%`, `%${agence}%`);
+        }
+        if (code_agence)
+        {
+            // Filtre exact (contrairement a "agence" ci-dessus, qui est une recherche floue) —
+            // utilise par la page "Historique de l'agence" pour ne lister que ses propres tickets
+            sql += ' AND i.code_agence = ?';
+            params.push(code_agence);
         }
         if (date)
         {

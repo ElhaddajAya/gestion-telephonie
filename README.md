@@ -49,7 +49,7 @@ L'agence n'a pas de compte volontairement : l'application ne traite aucune donn�
 
 ### Architecture en un coup d'œil
 
-```
+```text
 Navigateur (React)  <-->  Serveur (Node.js / Express)  <-->  Base de données (MySQL)
 ```
 
@@ -67,7 +67,7 @@ Le code est organisé en **deux espaces séparés** : un espace **admin** (prot�
 
 Chaque agence reçoit un lien unique de la forme :
 
-```
+```text
 https://<adresse-du-serveur>/agence/<code_agence>
 ```
 
@@ -184,6 +184,8 @@ Vue de son **propre** ticket — le fil de discussion et le changement d'état s
 Liste des 216 agences, avec recherche, filtres (succursale, plateforme téléphonique), modification des informations d'une agence, export Excel (regroupé par succursale) et import/mise à jour en masse via un fichier Excel (la plateforme "Avaya" est appliquée par défaut si elle n'est pas précisée dans le fichier).
 
 ![Liste des agences](screenshots/agences.png)
+
+Un lien **"Historique"** sur chaque ligne mène à une page dédiée à l'agence : nombre total d'incidents, répartition par état (ouverts/en cours/résolus), temps moyen de résolution de cette agence comparé à la moyenne du réseau, et la liste complète de ses tickets. Utile pour repérer une agence qui a des problèmes récurrents, sans avoir à filtrer manuellement "Tous les tickets".
 
 ### 3.6. Mon profil
 

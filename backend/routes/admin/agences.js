@@ -273,6 +273,51 @@ router.post('/import', verifyToken, upload.single('fichier'), async (req, res) =
     }
 });
 
+// GET /api/agences/:code/historique
+// Statistiques d'une agence precise : total, repartition par etat, temps moyen de
+// resolution (compare a la moyenne du reseau) — utilise par la page "Historique de l'agence"
+router.get('/:code/historique', verifyToken, async (req, res) =>
+{
+    const { code } = req.params;
+
+    try
+    {
+        const [agences] = await db.query('SELECT code_agence, nom, succursale FROM agence WHERE code_agence = ?', [code]);
+        if (agences.length === 0)
+        {
+            return res.status(404).json({ message: 'Agence introuvable.' });
+        }
+
+        const [[{ total }]] = await db.query('SELECT COUNT(*) AS total FROM incident WHERE code_agence = ?', [code]);
+
+        const [parEtat] = await db.query(
+            'SELECT etat, COUNT(*) AS total FROM incident WHERE code_agence = ? GROUP BY etat',
+            [code]
+        );
+
+        const [[tempsAgence]] = await db.query(
+            `SELECT AVG(TIMESTAMPDIFF(MINUTE, date_creation, date_resolution)) AS minutes_moyennes
+       FROM incident WHERE code_agence = ? AND etat = 'resolu' AND date_resolution IS NOT NULL`,
+            [code]
+        );
+        const [[tempsReseau]] = await db.query(
+            `SELECT AVG(TIMESTAMPDIFF(MINUTE, date_creation, date_resolution)) AS minutes_moyennes
+       FROM incident WHERE etat = 'resolu' AND date_resolution IS NOT NULL`
+        );
+
+        res.json({
+            agence: agences[0],
+            total,
+            par_etat: parEtat,
+            temps_resolution_minutes: tempsAgence.minutes_moyennes,
+            temps_resolution_reseau_minutes: tempsReseau.minutes_moyennes,
+        });
+    } catch (error)
+    {
+        res.status(500).json({ message: 'Erreur serveur', erreur: error.message });
+    }
+});
+
 // GET /api/agences/:code
 router.get('/:code', verifyToken, async (req, res) =>
 {

@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import Layout from "../../components/admin/Layout";
 import Pagination from "../../components/Pagination";
 import ModalModifierAgence from "../../components/admin/ModalModifierAgence";
 
 function Agences({ user, onLogout }) {
+  const navigate = useNavigate();
   const [agences, setAgences] = useState([]);
   const [chargement, setChargement] = useState(true);
   const [recherche, setRecherche] = useState("");
@@ -356,6 +358,19 @@ function Agences({ user, onLogout }) {
                   {a.plateforme_telephonie || "—"}
                 </td>
                 <td style={{ padding: "clamp(12px, 1vw, 18px) clamp(16px, 1.2vw, 22px)" }}>
+                  <span
+                    onClick={() => navigate(`/agences/${a.code_agence}/historique`)}
+                    style={{
+                      color: "#f77100",
+                      fontWeight: 600,
+                      fontSize: "12px",
+                      cursor: "pointer",
+                      whiteSpace: "nowrap",
+                      marginRight: "14px",
+                    }}
+                  >
+                    Historique
+                  </span>
                   <span
                     onClick={() => setAgenceEnEdition(a)}
                     style={{
