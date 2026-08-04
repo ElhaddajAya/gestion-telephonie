@@ -215,7 +215,7 @@ En plus de tout ce qu'un admin peut faire, le superadmin voit un badge **"Supera
 
 > Garde-fous : impossible de désactiver son propre compte, ni le dernier superadmin actif restant.
 
-![Gestion des comptes admin](screenshots/comptes-admin.png)
+![Gestion des comptes admin](screenshots/comptes-admins.png)
 
 ### 4.2. Pouvoirs particuliers du superadmin
 
