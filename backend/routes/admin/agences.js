@@ -297,12 +297,12 @@ router.get('/:code/historique', verifyToken, async (req, res) =>
 
         const [[tempsAgence]] = await db.query(
             `SELECT AVG(TIMESTAMPDIFF(MINUTE, date_creation, date_resolution)) AS minutes_moyennes
-       FROM incident WHERE code_agence = ? AND etat = 'resolu' AND date_resolution IS NOT NULL`,
+            FROM incident WHERE code_agence = ? AND etat = 'resolu' AND date_resolution IS NOT NULL`,
             [code]
         );
         const [[tempsReseau]] = await db.query(
             `SELECT AVG(TIMESTAMPDIFF(MINUTE, date_creation, date_resolution)) AS minutes_moyennes
-       FROM incident WHERE etat = 'resolu' AND date_resolution IS NOT NULL`
+            FROM incident WHERE etat = 'resolu' AND date_resolution IS NOT NULL`
         );
 
         res.json({
