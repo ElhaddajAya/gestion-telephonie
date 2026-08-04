@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const db = require('../../db');
+const { envoyerMail } = require('../../services/mailer');
 
 const router = express.Router();
 const verifyToken = require('../../middleware/auth');
@@ -88,6 +89,18 @@ router.post('/', verifyToken, verifierSuperadmin, async (req, res) =>
              VALUES (?, ?, ?, ?, ?, ?, 1, 1)`,
             [matricule, nom, prenom, email || null, role, hash]
         );
+
+        // Email automatique (no-op tant que le SMTP n'est pas configure, voir mailer.js).
+        // On garde aussi le mot de passe dans la reponse : le superadmin peut toujours le
+        // communiquer lui-meme si le mail n'arrive pas (spam, adresse erronee...).
+        if (email)
+        {
+            await envoyerMail(
+                email,
+                'TeleTrack - Création de votre compte',
+                `Bonjour ${prenom} ${nom},\n\nUn compte TeleTrack a été créé pour vous.\n\nMatricule : ${matricule}\nMot de passe temporaire : ${motDePasseTemporaire}\n\nCe mot de passe est à usage unique : il vous sera demandé de le changer dès votre première connexion.\nSi vous n'êtes pas à l'origine de cette demande, contactez votre superadmin.`
+            );
+        }
 
         res.status(201).json({
             message: 'Compte créé avec succès.',
@@ -195,17 +208,31 @@ router.put('/:id/reinitialiser-mot-de-passe', verifyToken, verifierSuperadmin, a
 
     try
     {
+        const [cibles] = await db.query('SELECT nom, prenom, email FROM utilisateur WHERE id = ?', [id]);
+        if (cibles.length === 0)
+        {
+            return res.status(404).json({ message: 'Compte introuvable.' });
+        }
+        const cible = cibles[0];
+
         const motDePasseTemporaire = genererMotDePasseTemporaire();
         const hash = await bcrypt.hash(motDePasseTemporaire, 10);
 
-        const [result] = await db.query(
+        await db.query(
             'UPDATE utilisateur SET mot_de_passe = ?, doit_changer_mot_de_passe = 1 WHERE id = ?',
             [hash, id]
         );
 
-        if (result.affectedRows === 0)
+        // Email automatique (no-op tant que le SMTP n'est pas configure, voir mailer.js).
+        // On garde aussi le mot de passe dans la reponse : le superadmin peut toujours le
+        // communiquer lui-meme si le mail n'arrive pas (spam, adresse erronee...).
+        if (cible.email)
         {
-            return res.status(404).json({ message: 'Compte introuvable.' });
+            await envoyerMail(
+                cible.email,
+                'TeleTrack - Réinitialisation de votre mot de passe',
+                `Bonjour ${cible.prenom} ${cible.nom},\n\nVotre mot de passe TeleTrack a été réinitialisé par un superadmin.\n\nNouveau mot de passe temporaire : ${motDePasseTemporaire}\n\nCe mot de passe est à usage unique : il vous sera demandé de le changer dès votre prochaine connexion.\nSi vous n'êtes pas à l'origine de cette demande, contactez votre superadmin.`
+            );
         }
 
         res.json({ message: 'Mot de passe réinitialisé.', mot_de_passe_temporaire: motDePasseTemporaire });

@@ -208,9 +208,9 @@ En plus de tout ce qu'un admin peut faire, le superadmin voit un badge **"Supera
 
 ### 4.1. Gestion des comptes admin
 
-- **Créer un compte** : matricule, prénom, nom, email, rôle (admin ou superadmin). Un mot de passe temporaire est généré automatiquement et affiché **une seule fois** — à communiquer à la personne concernée.
+- **Créer un compte** : matricule, prénom, nom, email, rôle (admin ou superadmin). Un mot de passe temporaire est généré automatiquement, **envoyé par email** à la personne concernée (si le SMTP est configuré, voir [8.5](#85-lemail-smtp)) et **affiché une seule fois** au superadmin — pour pouvoir le communiquer lui-même si le mail n'arrive pas (spam, adresse erronée...).
 - **Modifier un compte** : prénom, nom, email, rôle (impossible de changer son propre rôle, pour éviter de se bloquer soi-même par erreur).
-- **Réinitialiser le mot de passe** d'un compte : génère un nouveau mot de passe temporaire, affiché une seule fois.
+- **Réinitialiser le mot de passe** d'un compte : génère un nouveau mot de passe temporaire, envoyé par email et affiché une seule fois, mêmes principes que ci-dessus.
 - **Activer / désactiver un compte** : un compte désactivé ne peut plus se connecter. **Il n'y a jamais de suppression définitive** d'un compte — pour garder l'historique de qui a traité quel ticket, même après le départ d'un employé.
 
 > Garde-fous : impossible de désactiver son propre compte, ni le dernier superadmin actif restant.
@@ -417,7 +417,13 @@ Voir `docs/securite.md` pour le détail complet. En résumé : mots de passe hac
 
 ### 8.5. L'email (SMTP)
 
-`backend/services/mailer.js` ne fait rien tant que les variables `SMTP_*` (voir [section 11](#11-variables-denvironnement)) sont vides dans `backend/.env` — aucune erreur, juste un message dans les logs du serveur. Dès que ces variables sont renseignées avec de vrais identifiants SMTP, les emails déjà codés (à l'assignation d'un ticket, pour l'admin concerné et pour l'agence) partent automatiquement, sans toucher au code.
+`backend/services/mailer.js` ne fait rien tant que les variables `SMTP_*` (voir [section 11](#11-variables-denvironnement)) sont vides dans `backend/.env` — aucune erreur, juste un message dans les logs du serveur. Dès que ces variables sont renseignées avec de vrais identifiants SMTP, les emails déjà codés partent automatiquement, sans toucher au code :
+
+- à l'assignation d'un ticket, pour l'admin désormais en charge et pour l'agence ;
+- à la création d'un compte admin, avec le mot de passe temporaire ;
+- à la réinitialisation d'un mot de passe, avec le nouveau mot de passe temporaire.
+
+Dans les deux derniers cas, le mot de passe temporaire reste **aussi** affiché à l'écran au superadmin, en secours si le mail n'arrive pas (spam, adresse erronée...).
 
 ---
 
