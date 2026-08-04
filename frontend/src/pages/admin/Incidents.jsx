@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../../services/api";
 import { HiChevronUp, HiChevronDown } from "react-icons/hi";
 import Layout from "../../components/admin/Layout";
@@ -9,15 +9,36 @@ import Pagination from "../../components/Pagination";
 function Incidents({ user, onLogout }) {
   const [incidents, setIncidents] = useState([]);
   const [chargement, setChargement] = useState(true);
-  const [recherche, setRecherche] = useState("");
-  const [filtreEtat, setFiltreEtat] = useState("");
-  const [filtreType, setFiltreType] = useState("");
-  const [filtrePriorite, setFiltrePriorite] = useState("");
-  const [filtreDate, setFiltreDate] = useState("");
-  const [tri, setTri] = useState("desc");
-  const [page, setPage] = useState(1);
   const [taillePage, setTaillePage] = useState(10);
   const navigate = useNavigate();
+  // Les filtres/tri/page vivent dans l'URL (?etat=...&page=...) plutot que dans le state du
+  // composant : ainsi, revenir en arriere depuis le detail d'un ticket (bouton "Retour" ou
+  // bouton natif du navigateur) retombe exactement sur la meme liste filtree, au lieu de tout
+  // reinitialiser.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const recherche = searchParams.get("recherche") || "";
+  const filtreEtat = searchParams.get("etat") || "";
+  const filtreType = searchParams.get("type") || "";
+  const filtrePriorite = searchParams.get("priorite") || "";
+  const filtreDate = searchParams.get("date") || "";
+  const tri = searchParams.get("tri") || "desc";
+  const page = Number(searchParams.get("page")) || 1;
+
+  // Met a jour un filtre dans l'URL ; revient a la page 1 des qu'un filtre change
+  // (sauf quand c'est justement la page qu'on change)
+  const definirFiltre = (cle, valeur) => {
+    const params = new URLSearchParams(searchParams);
+    if (valeur) params.set(cle, valeur);
+    else params.delete(cle);
+    params.delete("page");
+    setSearchParams(params, { replace: true });
+  };
+
+  const changerPage = (nouvellePage) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("page", nouvellePage);
+    setSearchParams(params, { replace: true });
+  };
 
   useEffect(() => {
     async function charger() {
@@ -34,7 +55,6 @@ function Incidents({ user, onLogout }) {
           },
         });
         setIncidents(res.data);
-        setPage(1);
       } catch (error) {
         console.error("Erreur chargement incidents :", error);
       } finally {
@@ -95,12 +115,12 @@ function Incidents({ user, onLogout }) {
           type='text'
           placeholder='Rechercher une agence, un code, un titre...'
           value={recherche}
-          onChange={(e) => setRecherche(e.target.value)}
+          onChange={(e) => definirFiltre("recherche", e.target.value)}
           style={{ ...inputStyle, flex: 1, minWidth: "200px" }}
         />
         <select
           value={filtreEtat}
-          onChange={(e) => setFiltreEtat(e.target.value)}
+          onChange={(e) => definirFiltre("etat", e.target.value)}
           style={inputStyle}
         >
           <option value=''>Tous les états</option>
@@ -110,7 +130,7 @@ function Incidents({ user, onLogout }) {
         </select>
         <select
           value={filtreType}
-          onChange={(e) => setFiltreType(e.target.value)}
+          onChange={(e) => definirFiltre("type", e.target.value)}
           style={inputStyle}
         >
           <option value=''>Tous les types</option>
@@ -119,7 +139,7 @@ function Incidents({ user, onLogout }) {
         </select>
         <select
           value={filtrePriorite}
-          onChange={(e) => setFiltrePriorite(e.target.value)}
+          onChange={(e) => definirFiltre("priorite", e.target.value)}
           style={inputStyle}
         >
           <option value=''>Toutes les priorités</option>
@@ -130,7 +150,7 @@ function Incidents({ user, onLogout }) {
         <input
           type='date'
           value={filtreDate}
-          onChange={(e) => setFiltreDate(e.target.value)}
+          onChange={(e) => definirFiltre("date", e.target.value)}
           title='Filtrer par date de déclaration'
           style={inputStyle}
         />
@@ -202,7 +222,7 @@ function Incidents({ user, onLogout }) {
                 Traité par
               </th>
               <th
-                onClick={() => setTri(tri === "asc" ? "desc" : "asc")}
+                onClick={() => definirFiltre("tri", tri === "asc" ? "desc" : "asc")}
                 style={{
                   padding: "clamp(12px, 1vw, 18px) clamp(16px, 1.2vw, 22px)",
                   cursor: "pointer",
@@ -232,7 +252,11 @@ function Incidents({ user, onLogout }) {
                 key={inc.id}
                 onClick={() =>
                   navigate(`/incidents/${inc.id}`, {
-                    state: { from: "/incidents" },
+                    state: {
+                      from: searchParams.toString()
+                        ? `/incidents?${searchParams.toString()}`
+                        : "/incidents",
+                    },
                   })
                 }
                 style={{
@@ -316,7 +340,7 @@ function Incidents({ user, onLogout }) {
           page={page}
           totalItems={incidents.length}
           pageSize={taillePage}
-          onPageChange={setPage}
+          onPageChange={changerPage}
           onPageSizeChange={setTaillePage}
         />
       )}
